@@ -1,0 +1,9 @@
+{
+    "host": "postgres",
+    "port": 5432,
+    "database": "ee",
+    "username": "root",
+    "password": "1234",
+    "showSQL": true,
+    "ddl": "create"
+}

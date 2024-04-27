@@ -1,0 +1,5 @@
+name: ExpandingExtensions
+version: $version
+description: $description
+main: zinc.doiche.Main
+api-version: 1.20
