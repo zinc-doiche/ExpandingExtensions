@@ -22,7 +22,7 @@ class ClassLoader {
         val map = mutableMapOf<String, Any>()
         val pathes = getAllPath()
         pathes.forEach { _ -> processors.forEach { it.preProcess.invoke(map) } }
-        pathes.forEach { path -> processors.forEach { it.process(path) } }
+        pathes.forEach { path -> processors.forEach { it.process(path, map) } }
         pathes.forEach { _ -> processors.forEach { it.postProcess.invoke(map) } }
     }
 //
@@ -52,9 +52,9 @@ class ClassLoader {
 //        }
 //    }
 
-    private fun forClasses(consumer: (String) -> Unit) {
-        getAllPath().forEach(consumer)
-    }
+//    private fun forClasses(consumer: (String) -> Unit) {
+//        getAllPath().forEach(consumer)
+//    }
 
     private fun getAllPath(): List<String> {
         val list = mutableListOf<String>()

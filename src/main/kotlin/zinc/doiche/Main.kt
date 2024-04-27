@@ -1,11 +1,14 @@
 package zinc.doiche
 
+import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
+import zinc.doiche.lib.structure.Service
+import zinc.doiche.lib.log.LoggerUtil
 import java.io.File
 
 class Main: JavaPlugin() {
@@ -18,16 +21,33 @@ class Main: JavaPlugin() {
         DatabaseFactoryProvider().get().createEntityManager()
     }
 
-    override fun onEnable() {
-        plugin = this
-        entityManager.isOpen
-//        processAll()
+    val query: JPAQueryFactory by lazy {
+        JPAQueryFactory(entityManager)
     }
 
+    val services: List<Service> = mutableListOf()
+
     override fun onLoad() {
+        if(entityManager.isOpen) {
+            LoggerUtil.prefixedInfo("DB 연결 완료.")
+        }
+        processAll()
+        for (service in services) {
+            service.onLoad()
+        }
+    }
+
+    override fun onEnable() {
+        plugin = this
+        for (service in services) {
+            service.onEnable()
+        }
     }
 
     override fun onDisable() {
+        for (service in services) {
+            service.onDisable()
+        }
     }
 
     fun config(name: String): File = File(dataFolder, name).apply {
@@ -42,11 +62,10 @@ class Main: JavaPlugin() {
 
     private fun processAll() {
         ClassLoader()
-            .add { factory ->
-                factory.target(ProcessorFactory.Target.ANNOTATION)
-                    .preProcess { map -> map["annotation"] = "zinc.doiche.annotation.Plugin" }
-                    .process { clazz -> println(clazz) }
-                    .postProcess { map -> println(map) }
-            }.process()
+//            .add(ProcessorFactory.listener())
+//            .add(ProcessorFactory.translatable())
+//            .add(ProcessorFactory.command())
+            .add(ProcessorFactory.service())
+            .process()
     }
 }

@@ -1,15 +1,9 @@
 package zinc.doiche.lib.init
 
 class ProcessorFactoryImpl internal constructor(): ProcessorFactory {
-    private var target: ProcessorFactory.Target = ProcessorFactory.Target.ANNOTATION
     private var preProcess: (MutableMap<String, Any>) -> Unit = {}
-    private var processor: (Class<*>) -> Unit = {}
+    private var processor: (Class<*>, MutableMap<String, Any>) -> Unit = { _, _ -> }
     private var postProcess: (Map<String, Any>) -> Unit = {}
-
-    override fun target(target: ProcessorFactory.Target): ProcessorFactory {
-        this.target = target
-        return this
-    }
 
     override fun preProcess(preProcess: (MutableMap<String, Any>) -> Unit): ProcessorFactory {
         this.preProcess = preProcess
@@ -17,6 +11,11 @@ class ProcessorFactoryImpl internal constructor(): ProcessorFactory {
     }
 
     override fun process(processor: (Class<*>) -> Unit): ProcessorFactory {
+        this.processor = { clazz, _ -> processor.invoke(clazz) }
+        return this
+    }
+
+    override fun process(processor: (Class<*>, MutableMap<String, Any>) -> Unit): ProcessorFactory {
         this.processor = processor
         return this
     }
@@ -27,6 +26,6 @@ class ProcessorFactoryImpl internal constructor(): ProcessorFactory {
     }
 
     override fun create(): Processor {
-        return Processor(target, preProcess, processor, postProcess)
+        return Processor(preProcess, processor, postProcess)
     }
 }

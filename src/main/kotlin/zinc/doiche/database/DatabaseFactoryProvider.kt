@@ -25,7 +25,6 @@ class DatabaseFactoryProvider {
             jdbcUrl = config.getURL()
             username = config.username
             password = config.password
-
             maximumPoolSize = 10
             minimumIdle = 5
             idleTimeout = 60000 * 5
@@ -35,9 +34,6 @@ class DatabaseFactoryProvider {
         val dataSource = HikariDataSource(hikariConfig)
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
-//            "jakarta.persistence.jdbc.url" to config.getURL(),
-//            "jakarta.persistence.jdbc.user" to config.username,
-//            "jakarta.persistence.jdbc.password" to config.password,
             "hibernate.show_sql" to config.showSQL,
             "hibernate.hbm2ddl.auto" to config.ddl
         )

@@ -7,14 +7,6 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
             <property name="hibernate.archive.autodetection" value="class" />
-<!--            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" />-->
-<!--            <property name="jakarta.persistence.jdbc.url" value="${db.url}" />-->
-<!--            <property name="jakarta.persistence.jdbc.user" value="${db.username}" />-->
-<!--            <property name="jakarta.persistence.jdbc.password" value="${db.password}" />-->
-
-            <!-- Configuring Hibernate -->
-<!--            <property name="hibernate.show_sql" value="${db.show_sql}" />-->
-<!--            <property name="hibernate.hbm2ddl.auto" value="${db.ddl}" />-->
         </properties>
     </persistence-unit>
 </persistence>
