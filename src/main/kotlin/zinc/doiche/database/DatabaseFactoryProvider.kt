@@ -2,11 +2,11 @@ package zinc.doiche.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import jakarta.persistence.EntityManagerFactory
+import jakarta.persistence.Persistence
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.database.`object`.Config
 import zinc.doiche.util.toObject
-import javax.persistence.EntityManagerFactory
-import javax.persistence.Persistence
 
 class DatabaseFactoryProvider {
     private var entityManagerFactory: EntityManagerFactory? = null
@@ -34,10 +34,10 @@ class DatabaseFactoryProvider {
         }
         val dataSource = HikariDataSource(hikariConfig)
         val properties = mapOf(
-            "javax.persistence.nonJtaDataSource" to dataSource,
-//            "javax.persistence.jdbc.url" to config.getURL(),
-//            "javax.persistence.jdbc.user" to config.username,
-//            "javax.persistence.jdbc.password" to config.password,
+            "jakarta.persistence.nonJtaDataSource" to dataSource,
+//            "jakarta.persistence.jdbc.url" to config.getURL(),
+//            "jakarta.persistence.jdbc.user" to config.username,
+//            "jakarta.persistence.jdbc.password" to config.password,
             "hibernate.show_sql" to config.showSQL,
             "hibernate.hbm2ddl.auto" to config.ddl
         )

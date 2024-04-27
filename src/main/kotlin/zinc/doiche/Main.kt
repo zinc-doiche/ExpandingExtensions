@@ -1,13 +1,12 @@
 package zinc.doiche
 
+import jakarta.persistence.EntityManager
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import java.io.File
-import javax.persistence.EntityManager
-import javax.xml.parsers.DocumentBuilderFactory
 
 class Main: JavaPlugin() {
     internal companion object {

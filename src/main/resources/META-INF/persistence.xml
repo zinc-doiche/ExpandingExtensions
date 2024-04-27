@@ -7,11 +7,11 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
             <property name="hibernate.archive.autodetection" value="class" />
-<!--            <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver" />-->
-<!--            <property name="javax.persistence.jdbc.url" value="${db.url}" />-->
-<!--            <property name="javax.persistence.jdbc.user" value="${db.username}" />-->
-<!--            <property name="javax.persistence.jdbc.password" value="${db.password}" />-->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL82Dialect" />
+<!--            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" />-->
+<!--            <property name="jakarta.persistence.jdbc.url" value="${db.url}" />-->
+<!--            <property name="jakarta.persistence.jdbc.user" value="${db.username}" />-->
+<!--            <property name="jakarta.persistence.jdbc.password" value="${db.password}" />-->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
 
             <!-- Configuring Hibernate -->
 <!--            <property name="hibernate.show_sql" value="${db.show_sql}" />-->
