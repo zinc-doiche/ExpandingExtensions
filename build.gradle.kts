@@ -73,6 +73,14 @@ tasks {
     }
 }
 
+sourceSets {
+    main {
+        resources {
+            setSrcDirs(listOf("src/main/resources", "src/main/resources/META-INF"))
+        }
+    }
+}
+
 kapt {
     arguments {
         arg("querydsl.jpa", true)
