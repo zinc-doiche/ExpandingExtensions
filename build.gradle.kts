@@ -27,7 +27,7 @@ dependencies {
     implementation("redis.clients:jedis:5.1.2")
     implementation(kotlin("reflect"))
 
-//    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
+    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
     implementation("org.hibernate:hibernate-core:5.6.3.Final") {
         exclude(group = "cglib", module = "cglib")
         exclude(group = "asm", module = "asm")
@@ -37,11 +37,10 @@ dependencies {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
     implementation("org.hibernate:hibernate-c3p0:5.6.3.Final")
-    compileOnly("com.querydsl:querydsl-apt:5.0.0")
-    compileOnly("com.querydsl:querydsl-jpa:5.0.0")
+    implementation("com.querydsl:querydsl-core:jakarta")
+    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
 
-    kapt("com.querydsl:querydsl-apt:5.0.0:jpa")
-//    annotationProcessor("com.querydsl.apt.jpa.JPAAnnotationProcessor")
+    kapt("com.querydsl:querydsl-apt:5.0.0")
 }
 
 //의존성 탐색하도록 설정(duplicatesStrategy 설정시 필요)
@@ -55,12 +54,9 @@ tasks {
     }
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(configurations.implementation.get()
-//            .filter{
-////                println(it.name)
-//                !it.name.contains("kommand") && !it.name.contains("kotlin-")
-//            }
-            .map { if (it.isDirectory) it else zipTree(it) })
+        from(configurations.implementation.get().map {
+            if (it.isDirectory) it else zipTree(it)
+        })
     }
     java {
 //        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
