@@ -75,11 +75,10 @@ class DatabaseFactoryProvider {
     }
 
     private fun initEntityManagerFactory(config: Config): EntityManagerFactory {
-        val manager = Persistence.createEntityManagerFactory(config.database, mapOf(
+        val manager = Persistence.createEntityManagerFactory("database", mapOf(
             "db.url" to config.getURL(),
             "db.username" to config.username,
             "db.password" to config.password,
-            "db.name" to config.database,
             "db.show_sql" to config.showSQL,
             "db.ddl" to config.ddl,
         ))
