@@ -27,7 +27,7 @@ dependencies {
     implementation("redis.clients:jedis:5.1.2")
     implementation(kotlin("reflect"))
 
-    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
+//    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
     implementation("org.hibernate:hibernate-core:5.6.3.Final") {
         exclude(group = "cglib", module = "cglib")
         exclude(group = "asm", module = "asm")
