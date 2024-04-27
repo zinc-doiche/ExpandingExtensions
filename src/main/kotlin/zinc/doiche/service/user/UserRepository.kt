@@ -8,9 +8,7 @@ import zinc.doiche.service.user.`object`.User
 
 object UserRepository: Repository<User> {
     override fun save(entity: User) {
-        plugin.entityManager.
 
-        TODO("Not yet implemented")
     }
 
     override fun findById(id: Long): User? {

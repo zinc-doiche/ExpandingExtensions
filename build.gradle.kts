@@ -48,8 +48,7 @@ dependencies {
     implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-
-    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+//    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 }
