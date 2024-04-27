@@ -23,25 +23,25 @@ dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
     compileOnly("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("org.postgresql:postgresql:42.7.0")
+    implementation("org.postgresql:postgresql:42.7.3")
     implementation("redis.clients:jedis:5.1.2")
     implementation(kotlin("reflect"))
 
-//    implementation("jakarta.persistence:jakarta.persistence-api:2.2.3")
-    implementation("org.hibernate:hibernate-core:5.6.3.Final") {
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    implementation("org.hibernate:hibernate-core:6.5.0.Final") {
         exclude(group = "cglib", module = "cglib")
         exclude(group = "asm", module = "asm")
     }
-    implementation("org.hibernate:hibernate-ehcache:5.6.3.Final")
-    implementation("org.hibernate.validator:hibernate-validator:7.0.2.Final") {
+//    implementation("org.hibernate:hibernate-ehcache:6.5.0.Final")
+    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
         exclude(group = "org.slf4j", module = "slf4j-api")
     }
-    implementation("org.hibernate:hibernate-c3p0:5.6.3.Final")
+//    implementation("org.hibernate:hibernate-c3p0:5.6.3.Final")
     implementation("com.querydsl:querydsl-core:jakarta")
-    implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-    implementation("com.zaxxer:HikariCP:5.0.0")
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    implementation("com.zaxxer:HikariCP:5.1.0")
 
-    kapt("com.querydsl:querydsl-apt:5.0.0")
+    kapt("com.querydsl:querydsl-apt:5.1.0")
 }
 
 //의존성 탐색하도록 설정(duplicatesStrategy 설정시 필요)
