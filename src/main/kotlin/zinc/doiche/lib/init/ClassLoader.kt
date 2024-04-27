@@ -1,5 +1,6 @@
 package zinc.doiche.lib.init
 
+import zinc.doiche.plugin
 import java.io.File
 import java.nio.file.Paths
 import java.util.jar.JarFile
@@ -74,7 +75,7 @@ internal fun searchInProject(block: (JarFile) -> Unit) {
     val folder = File(Paths.get("./plugins/").toUri());
     val files = folder.listFiles() ?: return;
     for (file in files) {
-        if(!file.name.contains("AnimalFarm") || !file.name.endsWith(".jar")) {
+        if(!file.name.contains(plugin.name) || !file.name.endsWith(".jar")) {
             continue;
         }
         JarFile(file).use(block)

@@ -24,13 +24,18 @@ class DatabaseFactoryProvider {
 
     private fun create(): EntityManagerFactory {
         val config = plugin.config("database.json").toObject(Config::class.java)
-        replacePlaceholdersInPersistenceXml(config)
-        return initEntityManagerFactory(config.database)
+        //replacePlaceholdersInPersistenceXml(config)
+        return initEntityManagerFactory(config)
     }
 
     private fun replacePlaceholdersInPersistenceXml(config: Config) {
 //        val persistenceXmlFile = File(plugin.dataFolder, "META-INF/persistence.xml")
         var persistenceXmlFile: File? = null
+
+        Thread.currentThread().contextClassLoader.resources("META-INF/persistence.xml").forEach {
+            if(it.path.contains("META-INF"))
+                plugin.logger.info("path: ${it.path}")
+        }
 
         searchInProject { jarFile ->
             jarFile.versionedStream().forEach { jarEntry ->
@@ -69,8 +74,15 @@ class DatabaseFactoryProvider {
         transformer.transform(source, result)
     }
 
-    private fun initEntityManagerFactory(name: String): EntityManagerFactory {
-        val manager = Persistence.createEntityManagerFactory(name)
+    private fun initEntityManagerFactory(config: Config): EntityManagerFactory {
+        val manager = Persistence.createEntityManagerFactory(config.database, mapOf(
+            "db.url" to config.getURL(),
+            "db.username" to config.username,
+            "db.password" to config.password,
+            "db.name" to config.database,
+            "db.show_sql" to config.showSQL,
+            "db.ddl" to config.ddl,
+        ))
         entityManagerFactory = manager
         return manager
     }
