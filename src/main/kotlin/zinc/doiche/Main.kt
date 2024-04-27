@@ -7,17 +7,21 @@ import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import java.io.File
 import javax.persistence.EntityManager
-
-internal lateinit var plugin: Main
-    private set
+import javax.xml.parsers.DocumentBuilderFactory
 
 class Main: JavaPlugin() {
-    lateinit var entityManager: EntityManager
-        private set
+    internal companion object {
+        lateinit var plugin: Main
+            private set
+    }
+
+    val entityManager: EntityManager by lazy {
+        DatabaseFactoryProvider().get().createEntityManager()
+    }
 
     override fun onEnable() {
         plugin = this
-        entityManager = DatabaseFactoryProvider().get().createEntityManager()
+        entityManager.isOpen
 //        processAll()
     }
 
@@ -27,12 +31,10 @@ class Main: JavaPlugin() {
     override fun onDisable() {
     }
 
-    fun config(name: String): File {
-        val file = File(dataFolder, name)
+    fun config(name: String): File = File(dataFolder, name).apply {
         if (!file.exists()) {
             saveResource(name, false)
         }
-        return file
     }
 
     fun register(listener: Listener) {

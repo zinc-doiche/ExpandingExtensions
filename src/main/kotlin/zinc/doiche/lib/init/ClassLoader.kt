@@ -1,6 +1,6 @@
 package zinc.doiche.lib.init
 
-import zinc.doiche.plugin
+import zinc.doiche.Main.Companion.plugin
 import java.io.File
 import java.nio.file.Paths
 import java.util.jar.JarFile

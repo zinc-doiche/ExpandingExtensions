@@ -1,8 +1,8 @@
 {
-    "host": "postgres",
+    "host": "localhost",
     "port": 5432,
-    "database": "ee",
-    "username": "root",
+    "database": "database",
+    "username": "postgres",
     "password": "1234",
     "showSQL": true,
     "ddl": "create"

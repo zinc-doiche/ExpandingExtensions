@@ -4,7 +4,7 @@ plugins {
     kotlin("plugin.noarg") version "1.9.10"
     id("org.jetbrains.kotlin.jvm") version "1.9.10"
     id("io.papermc.paperweight.userdev") version "1.5.10"
-    id("xyz.jpenilla.run-paper") version "2.2.2" // Adds runServer task for testing
+//    id("xyz.jpenilla.run-paper") version "2.2.2" // Adds runServer task for testing
 }
 
 group = "zinc.doiche"
@@ -39,6 +39,7 @@ dependencies {
     implementation("org.hibernate:hibernate-c3p0:5.6.3.Final")
     implementation("com.querydsl:querydsl-core:jakarta")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+    implementation("com.zaxxer:HikariCP:5.0.0")
 
     kapt("com.querydsl:querydsl-apt:5.0.0")
 }
@@ -71,12 +72,15 @@ tasks {
     assemble {
         dependsOn(reobfJar)
     }
+    reobfJar {
+        outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-${project.version}.jar"))
+    }
 }
 
 sourceSets {
     main {
         resources {
-            setSrcDirs(listOf("src/main/resources", "src/main/resources/META-INF"))
+            srcDirs("src/main/resources/META-INF")
         }
     }
 }
