@@ -7,10 +7,14 @@ import jakarta.persistence.Persistence
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.util.toObject
 
-class DatabaseFactoryProvider {
+object DatabaseFactoryProvider {
     private var entityManagerFactory: EntityManagerFactory? = null
 
     fun get() = entityManagerFactory ?: create()
+
+    fun close() {
+        entityManagerFactory?.close()
+    }
 
     private fun create(): EntityManagerFactory {
         val config = plugin.config("database.json").toObject(Config::class.java)

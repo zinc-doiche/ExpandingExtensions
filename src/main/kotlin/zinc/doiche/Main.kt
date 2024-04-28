@@ -23,7 +23,7 @@ class Main: JavaPlugin() {
     }
 
     val entityManager: EntityManager by lazy {
-        DatabaseFactoryProvider().get().createEntityManager()
+        DatabaseFactoryProvider.get().createEntityManager()
     }
 
     val query: JPAQueryFactory by lazy {
@@ -58,9 +58,8 @@ class Main: JavaPlugin() {
         for (service in services) {
             service.onDisable()
         }
+        DatabaseFactoryProvider.close()
         entityManager.close()
-
-        DatabaseFactoryProvider().get().close()
     }
 
     fun config(name: String): File = File(dataFolder, name).apply {
