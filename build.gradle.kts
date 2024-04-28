@@ -28,27 +28,29 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
-    compileOnly("com.google.code.gson:gson:2.10.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+    implementation(kotlin("reflect"))
+    compileOnly("com.google.code.gson:gson:2.10.1")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("redis.clients:jedis:5.1.2")
-    implementation(kotlin("reflect"))
 
     implementation("org.hibernate:hibernate-core:6.5.0.Final") {
         exclude(group = "cglib", module = "cglib")
         exclude(group = "asm", module = "asm")
     }
-    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
-        exclude(group = "org.slf4j", module = "slf4j-api")
-    }
+//    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
+//        exclude(group = "org.slf4j", module = "slf4j-api")
+//    }
+    implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
+    implementation("org.ehcache:ehcache:3.10.0")
     implementation("com.zaxxer:HikariCP:5.1.0")
 
     implementation("com.querydsl:querydsl-core:5.0.0")
     implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
     implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
+//    implementation("jakarta.transaction:jakarta.transaction-api:2.0.1")
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-//    annotationProcessor("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
 }

@@ -6,11 +6,13 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import org.hibernate.cache.spi.RegionFactory
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.lib.structure.Service
 import zinc.doiche.lib.log.LoggerUtil
+import zinc.doiche.service.user.UserService
 import zinc.doiche.util.append
 import java.io.File
 
@@ -35,9 +37,12 @@ class Main: JavaPlugin() {
         if(entityManager.isOpen) {
             LoggerUtil.prefixedInfo("DB 연결 완료.")
         }
-        processAll()
+//        processAll()
+
+        (services as MutableList<Service>).add(UserService())
+
         for (service in services) {
-            LoggerUtil.prefixedInfo(text("Loading ")
+            LoggerUtil.prefixedInfo(text("[ Service ] -").append(" Loading ")
                 .append(service::class.simpleName!!, NamedTextColor.YELLOW))
             service.onLoad()
         }
@@ -53,6 +58,9 @@ class Main: JavaPlugin() {
         for (service in services) {
             service.onDisable()
         }
+        entityManager.close()
+
+        DatabaseFactoryProvider().get().close()
     }
 
     fun config(name: String): File = File(dataFolder, name).apply {

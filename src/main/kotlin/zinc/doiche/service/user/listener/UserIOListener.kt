@@ -11,6 +11,7 @@ import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.User
 import zinc.doiche.service.user.user
 import zinc.doiche.util.transaction
+import kotlin.time.measureTime
 
 @ListenerRegistry
 class UserIOListener: Listener {
@@ -21,16 +22,19 @@ class UserIOListener: Listener {
         if(event.loginResult != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return
         }
-        val user = UserService.repository.findByUUID(uuid)?.apply {
-            period.update()
-        } ?: User(uuid).apply {
-            transaction {
-                UserService.repository.save(this)
+        measureTime {
+            val user = UserService.repository.findByUUID(uuid)?.apply {
+                period.update()
+            } ?: User(uuid).apply {
+                transaction {
+                    UserService.repository.save(this)
+                }
             }
-        }
-
-        transaction {
-            user.levelHolder.addLevel()
+            transaction {
+                user.levelHolder.addLevel()
+            }
+        }.let { time ->
+            plugin.logger.info("UserIOListener.onPreLogin: $time")
         }
     }
 

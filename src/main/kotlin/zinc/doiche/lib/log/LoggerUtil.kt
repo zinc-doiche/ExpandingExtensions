@@ -14,7 +14,11 @@ object LoggerUtil {
     @JvmStatic
     private val prefix = text("[ ").append(text("ExpExt", NamedTextColor.AQUA)).append(" ]: ")
 
-    fun prefixedInfo(msg: String) = plugin.componentLogger.info(prefix.append(msg))
+    fun prefixed(component: Component) = prefix.append(component)
 
-    fun prefixedInfo(msg: Component) = plugin.componentLogger.info(prefix.append(msg))
+    fun prefixed(string: String) = prefix.append(string)
+
+    fun prefixedInfo(msg: String) = plugin.componentLogger.info(prefixed(msg))
+
+    fun prefixedInfo(msg: Component) = plugin.componentLogger.info(prefixed(msg))
 }

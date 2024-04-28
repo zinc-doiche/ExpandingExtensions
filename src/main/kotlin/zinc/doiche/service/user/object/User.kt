@@ -6,6 +6,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -13,6 +14,7 @@ import zinc.doiche.database.`object`.Period
 import java.util.*
 
 @Entity
+@Table(name = "USER")
 class User(
     @Column(unique = true)
     val uuid: UUID,
@@ -34,9 +36,7 @@ class User(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as User
-
         return id == other.id
     }
 

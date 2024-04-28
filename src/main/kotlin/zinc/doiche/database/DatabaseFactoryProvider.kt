@@ -15,6 +15,7 @@ class DatabaseFactoryProvider {
     private fun create(): EntityManagerFactory {
         val config = plugin.config("database.json").toObject(Config::class.java)
         Thread.currentThread().contextClassLoader = javaClass.classLoader
+//        Thread.currentThread().contextClassLoader = PluginClassLoader.getSystemClassLoader()
         return initEntityManagerFactory(config)
     }
 
@@ -35,11 +36,15 @@ class DatabaseFactoryProvider {
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
             "hibernate.show_sql" to config.showSQL,
-            "hibernate.hbm2ddl.auto" to config.ddl
+            "hibernate.hbm2ddl.auto" to config.ddl,
+            "hibernate.cache.use_second_level_cache" to true,
+            "hibernate.globally_quoted_identifiers" to true,
+            "hibernate.cache.region.factory_class" to "org.hibernate.cache.jcache.internal.JCacheRegionFactory",
         )
-        val manager = Persistence.createEntityManagerFactory("database", properties)
-        entityManagerFactory = manager
-        return manager
+
+        val managerFactory = Persistence.createEntityManagerFactory("database", properties)
+        entityManagerFactory = managerFactory
+        return managerFactory
     }
 
     data class Config(
