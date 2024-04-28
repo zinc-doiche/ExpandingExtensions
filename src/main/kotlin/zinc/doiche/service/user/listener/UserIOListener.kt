@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.annotation.ListenerRegistry
 import zinc.doiche.service.user.UserService
@@ -22,20 +23,18 @@ class UserIOListener: Listener {
         if(event.loginResult != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return
         }
-        measureTime {
-            val user = UserService.repository.findByUUID(uuid)?.apply {
+        UserService.repository.run {
+            val user = findByUUID(uuid)?.apply {
                 period.update()
             } ?: User(uuid).apply {
                 transaction {
-                    UserService.repository.save(this)
+                    save(this)
                 }
             }
             transaction {
                 user.levelHolder.addLevel()
+                saveID(uuid, user.id!!)
             }
-            UserService.repository.saveID(uuid, user.id!!)
-        }.let { time ->
-            plugin.logger.info("UserIOListener.onPreLogin: $time")
         }
     }
 
@@ -49,5 +48,17 @@ class UserIOListener: Listener {
         val level = user.levelHolder.level
 
         player.sendMessage("Level: $level")
+    }
+
+    @EventHandler
+    fun onQuit(event: PlayerQuitEvent) {
+        val player = event.player
+        val user = player.user ?: return
+        transaction {
+            UserService.repository.run {
+                save(user)
+                removeID(player.uniqueId)
+            }
+        }
     }
 }

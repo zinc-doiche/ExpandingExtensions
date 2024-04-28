@@ -14,7 +14,7 @@ class UserRepository: Repository<User> {
         userIDMap[uuid] = id
     }
 
-    fun removeID(uuid: UUID, id: Long) {
+    fun removeID(uuid: UUID) {
         userIDMap.remove(uuid)
     }
 
