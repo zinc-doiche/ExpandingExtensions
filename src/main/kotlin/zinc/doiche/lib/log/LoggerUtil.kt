@@ -12,7 +12,7 @@ import zinc.doiche.util.append
 object LoggerUtil {
 //    @Translatable("log.prefix", defaultValue = [""])
     @JvmStatic
-    private val prefix = text("[ ").append(text("ExpExt", NamedTextColor.AQUA)).append(" ] ")
+    private val prefix = text("[ ").append(text("ExpExt", NamedTextColor.AQUA)).append(" ]: ")
 
     fun prefixedInfo(msg: String) = plugin.componentLogger.info(prefix.append(msg))
 

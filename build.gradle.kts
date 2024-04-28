@@ -68,12 +68,8 @@ tasks {
             if (it.isDirectory) it else zipTree(it)
         })
     }
-    java {
-//        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
-    }
     compileJava {
-        options.encoding = "UTF-8" // We want UTF-8 for everything
-//        options.release.set(17)
+        options.encoding = "UTF-8"
     }
     javadoc {
         options.encoding = "UTF-8" // We want UTF-8 for everything

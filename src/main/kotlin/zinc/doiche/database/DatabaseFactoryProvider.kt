@@ -5,7 +5,6 @@ import com.zaxxer.hikari.HikariDataSource
 import jakarta.persistence.EntityManagerFactory
 import jakarta.persistence.Persistence
 import zinc.doiche.Main.Companion.plugin
-import zinc.doiche.database.`object`.Config
 import zinc.doiche.util.toObject
 
 class DatabaseFactoryProvider {
@@ -25,11 +24,12 @@ class DatabaseFactoryProvider {
             jdbcUrl = config.getURL()
             username = config.username
             password = config.password
+//            isAutoCommit = true
+
             maximumPoolSize = 10
             minimumIdle = 5
             idleTimeout = 60000 * 5
             connectionTimeout = 60000
-            isAutoCommit = true
         }
         val dataSource = HikariDataSource(hikariConfig)
         val properties = mapOf(
@@ -40,5 +40,17 @@ class DatabaseFactoryProvider {
         val manager = Persistence.createEntityManagerFactory("database", properties)
         entityManagerFactory = manager
         return manager
+    }
+
+    data class Config(
+        val host: String,
+        val port: Int,
+        val database: String,
+        val username: String,
+        val password: String,
+        val showSQL: String,
+        val ddl: String
+    ) {
+        fun getURL(): String = "jdbc:postgresql://$host:$port/$database"
     }
 }

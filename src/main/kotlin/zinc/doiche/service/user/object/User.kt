@@ -1,17 +1,46 @@
 package zinc.doiche.service.user.`object`
 
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Transient
+import org.bukkit.Bukkit
+import org.bukkit.entity.Player
+import zinc.doiche.database.`object`.Period
 import java.util.*
 
 @Entity
-data class User(
-    @Id @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Long = 0,
+class User(
+    @Column(unique = true)
+    val uuid: UUID,
 
-    @Column
-    val uuid: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000"),
-)
+    @Embedded
+    val levelHolder: LevelHolder = LevelHolder(),
+
+    @Embedded
+    val period: Period = Period()
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long? = null
+
+    @get:Transient
+    val player: Player?
+        get() = Bukkit.getPlayer(uuid)
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as User
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+}
