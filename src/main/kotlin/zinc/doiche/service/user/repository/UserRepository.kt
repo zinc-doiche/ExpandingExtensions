@@ -8,7 +8,15 @@ import zinc.doiche.service.user.`object`.User
 import java.util.*
 
 class UserRepository: Repository<User> {
-    val userIDMap = mutableMapOf<UUID, Long>()
+    private val userIDMap = mutableMapOf<UUID, Long>()
+
+    fun saveID(uuid: UUID, id: Long) {
+        userIDMap[uuid] = id
+    }
+
+    fun removeID(uuid: UUID, id: Long) {
+        userIDMap.remove(uuid)
+    }
 
     override fun save(entity: User) {
         plugin.entityManager.persist(entity)

@@ -33,6 +33,7 @@ class UserIOListener: Listener {
             transaction {
                 user.levelHolder.addLevel()
             }
+            UserService.repository.saveID(uuid, user.id!!)
         }.let { time ->
             plugin.logger.info("UserIOListener.onPreLogin: $time")
         }
