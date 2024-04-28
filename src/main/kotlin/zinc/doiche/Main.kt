@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
-import org.hibernate.cache.spi.RegionFactory
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory

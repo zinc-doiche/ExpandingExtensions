@@ -12,6 +12,7 @@ class UserService: Service {
 
     override fun onEnable() {
         plugin.register(UserIOListener())
+        plugin.register(CommonListener())
     }
 
     override fun onDisable() {
