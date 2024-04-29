@@ -11,7 +11,6 @@ import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.lib.structure.Service
 import zinc.doiche.lib.log.LoggerUtil
-import zinc.doiche.service.user.UserService
 import zinc.doiche.util.append
 import java.io.File
 
@@ -19,44 +18,31 @@ class Main: JavaPlugin() {
     internal companion object {
         lateinit var plugin: Main
             private set
+
+        private fun initPluginInst(plugin: Main) {
+            this.plugin = plugin
+        }
     }
 
-    val entityManager: EntityManager by lazy {
-        DatabaseFactoryProvider.get().createEntityManager()
-    }
+    val entityManager: EntityManager by lazy { DatabaseFactoryProvider.get().createEntityManager() }
 
-    val query: JPAQueryFactory by lazy {
-        JPAQueryFactory(entityManager)
-    }
+    val query: JPAQueryFactory by lazy { JPAQueryFactory(entityManager) }
 
     val services: List<Service> = mutableListOf()
 
     override fun onLoad() {
-        plugin = this
-        if(entityManager.isOpen) {
-            LoggerUtil.prefixedInfo("DB 연결 완료.")
-        }
-//        processAll()
-
-        (services as MutableList<Service>).add(UserService())
-
-        for (service in services) {
-            LoggerUtil.prefixedInfo(text("[ Service ] -").append(" Loading ")
-                .append(service::class.simpleName!!, NamedTextColor.YELLOW))
-            service.onLoad()
-        }
+        initPluginInst(this)
+        initEntityManager()
+        processAll()
+        loadServices()
     }
 
     override fun onEnable() {
-        for (service in services) {
-            service.onEnable()
-        }
+        services.forEach(Service::onEnable)
     }
 
     override fun onDisable() {
-        for (service in services) {
-            service.onDisable()
-        }
+        services.forEach(Service::onDisable)
         DatabaseFactoryProvider.close()
         entityManager.close()
     }
@@ -73,10 +59,25 @@ class Main: JavaPlugin() {
 
     private fun processAll() {
         ClassLoader()
-            .add(ProcessorFactory.listener())
+//            .add(ProcessorFactory.configuration())
 //            .add(ProcessorFactory.translatable())
-//            .add(ProcessorFactory.command())
             .add(ProcessorFactory.service())
+            .add(ProcessorFactory.command())
+            .add(ProcessorFactory.listener())
             .process()
+    }
+
+    private fun loadServices() {
+        for (service in services) {
+            LoggerUtil.prefixedInfo(text("[ ").append("Service", NamedTextColor.DARK_AQUA).append(" ] ")
+                .append("Loading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
+            service.onLoad()
+        }
+    }
+
+    private fun initEntityManager() {
+        if(entityManager.isOpen) {
+            LoggerUtil.prefixedInfo("DB 연결 완료.")
+        }
     }
 }
