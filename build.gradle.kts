@@ -4,7 +4,7 @@ plugins {
     kotlin("plugin.allopen") version "1.9.10"
     kotlin("plugin.noarg") version "1.9.10"
     id("org.jetbrains.kotlin.jvm") version "1.9.10"
-    id("io.papermc.paperweight.userdev") version "1.5.10"
+    id("io.papermc.paperweight.userdev") version "1.5.12"
 //    id("xyz.jpenilla.run-paper") version "2.2.2" // Adds runServer task for testing
 }
 
@@ -28,6 +28,7 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
+//    paperweight.paperDevBundle("1.20.5-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation(kotlin("reflect"))
     compileOnly("com.google.code.gson:gson:2.10.1")

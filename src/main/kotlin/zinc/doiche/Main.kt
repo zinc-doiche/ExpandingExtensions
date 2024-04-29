@@ -28,7 +28,7 @@ class Main: JavaPlugin() {
 
     val query: JPAQueryFactory by lazy { JPAQueryFactory(entityManager) }
 
-    val services: List<Service> = mutableListOf()
+    private val services: MutableList<Service> = mutableListOf()
 
     override fun onLoad() {
         initPluginInst(this)
@@ -57,6 +57,10 @@ class Main: JavaPlugin() {
         server.pluginManager.registerEvents(listener, this)
     }
 
+    fun register(service: Service) {
+        services.add(service)
+    }
+
     private fun processAll() {
         ClassLoader()
 //            .add(ProcessorFactory.configuration())
@@ -69,7 +73,7 @@ class Main: JavaPlugin() {
 
     private fun loadServices() {
         for (service in services) {
-            LoggerUtil.prefixedInfo(text("[ ").append("Service", NamedTextColor.DARK_AQUA).append(" ] ")
+            LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
                 .append("Loading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
             service.onLoad()
         }

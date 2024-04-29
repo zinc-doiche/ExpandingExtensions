@@ -22,11 +22,9 @@ class PlayerArgument(
         }
 
         @Throws(CommandSyntaxException::class)
-        fun getPlayer(context: CommandContext<CommandSourceStack>, argument: String): Player {
-            return getPlayer(context.source, context.getArgument(argument, EntitySelector::class.java))
+        fun CommandContext<CommandSourceStack>.getPlayer(argument: String): Player {
+            return getPlayer(source, getArgument(argument, EntitySelector::class.java))
         }
 
-        @Throws(CommandSyntaxException::class)
-        fun CommandContext<CommandSourceStack>.getPlayer(argument: String) = getPlayer(this, argument)
     }
 }

@@ -6,24 +6,35 @@ import java.nio.file.Paths
 import java.util.jar.JarFile
 
 class ClassLoader {
-    private val processors = ArrayList<Processor>()
+    private val processors = ArrayList<Processor<*>>()
 
-    fun add(processorFactory: (ProcessorFactory) -> ProcessorFactory): ClassLoader {
+    fun <T> add(processorFactory: (ProcessorFactory<T>) -> ProcessorFactory<T>): ClassLoader {
         val factory = processorFactory.invoke(ProcessorFactory.factory())
         return add(factory.create())
     }
 
-    fun add(processor: Processor): ClassLoader {
+    fun add(processor: Processor<*>): ClassLoader {
         processors.add(processor)
         return this
     }
 
     fun process() {
-        val map = mutableMapOf<String, Any>()
-        val pathes = getAllPath("zinc.doiche")
-        pathes.forEach { _ -> processors.forEach { it.preProcess.invoke(map) } }
-        pathes.forEach { path -> processors.forEach { it.process(path, map) } }
-        pathes.forEach { _ -> processors.forEach { it.postProcess.invoke(map) } }
+        val objectList = mutableListOf<Any?>()
+
+        processors.forEach {
+            val preObject = it.preProcess()
+            objectList.add(preObject)
+        }
+        getAllPath("zinc.doiche").forEach { path ->
+            processors.forEachIndexed { index, processor ->
+                val preObject = objectList[index]
+                processor.process(path, preObject)
+            }
+        }
+        processors.forEachIndexed { index, processor ->
+            val preObject = objectList[index]
+            processor.postProcess(preObject)
+        }
     }
 
     private fun getAllPath(packageName: String): List<String> {

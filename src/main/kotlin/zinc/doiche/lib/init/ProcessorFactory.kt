@@ -1,26 +1,31 @@
 package zinc.doiche.lib.init
 
+import com.google.common.collect.Multimap
+import com.google.common.collect.Multimaps
+import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.event.Listener
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.annotation.*
+import zinc.doiche.lib.log.LoggerUtil
 import zinc.doiche.lib.structure.Service
+import zinc.doiche.util.append
 
-interface ProcessorFactory {
-    fun preProcess(preProcess: (MutableMap<String, Any>) -> Unit): ProcessorFactory
-    fun process(processor: (Class<*>) -> Unit): ProcessorFactory
-    fun process(processor: (Class<*>, MutableMap<String, Any>) -> Unit): ProcessorFactory
-    fun postProcess(postProcess: (Map<String, Any>) -> Unit): ProcessorFactory
-    fun create(): Processor
+interface ProcessorFactory<T> {
+    fun preProcess(preProcess: () -> T?): ProcessorFactory<T>
+    fun process(processor: (Class<*>, T?) -> Unit): ProcessorFactory<T>
+    fun postProcess(postProcess: (T?) -> Unit): ProcessorFactory<T>
+    fun create(): Processor<T>
 
     companion object {
-        fun factory(): ProcessorFactory {
+        fun <T> factory(): ProcessorFactory<T> {
             return ProcessorFactoryImpl()
         }
 
-        fun listener(): Processor = factory()
-            .process { clazz ->
+        fun listener(): Processor<Nothing> = factory<Nothing>()
+            .process { clazz, _ ->
                 if(clazz.isAnnotationPresent(ListenerRegistry::class.java)
                         && clazz.superclass.isAssignableFrom(Listener::class.java)) {
                     val listener = clazz.getDeclaredConstructor().newInstance() as Listener
@@ -29,8 +34,8 @@ interface ProcessorFactory {
             }
             .create()
 
-        fun command(): Processor = factory()
-            .process { clazz ->
+        fun command(): Processor<Nothing> = factory<Nothing>()
+            .process { clazz, _ ->
                 if(!clazz.isAnnotationPresent(CommandRegistry::class.java)) {
                     return@process
                 }
@@ -38,35 +43,46 @@ interface ProcessorFactory {
                 val commandMap = Bukkit.getCommandMap()
                 for (method in clazz.declaredMethods) {
                     if(method.isAnnotationPresent(CommandFactory::class.java)) {
+                        val factory = method.getAnnotation(CommandFactory::class.java)
+                        val aliases = factory.aliases
                         val command = method.invoke(commandRegistry) as Command
+
+                        command.aliases = aliases.toMutableList()
+                        logCommand(command)
                         commandMap.register(plugin.name, command)
                     }
                 }
             }
             .create()
 
-        @Suppress("UNCHECKED_CAST")
-        fun service(): Processor = factory()
-            .process { clazz, map ->
+        private fun logCommand(command: Command) = LoggerUtil.prefixedInfo(text("[")
+            .append("Command", NamedTextColor.LIGHT_PURPLE)
+            .append("] ")
+            .append(command.name)
+            .appendSpace()
+            .append(command.aliases.toString()))
+
+        fun service(): Processor<Multimap<Int, Service>> = factory<Multimap<Int, Service>>()
+            .preProcess {
+                Multimaps.newListMultimap(mutableMapOf(), ::mutableListOf)
+            }
+            .process { clazz, preObject ->
                 if(clazz.superclass.isAssignableFrom(Service::class.java)) {
                     val service = clazz.getDeclaredConstructor().newInstance() as Service
                     val priority = if(clazz.isAnnotationPresent(Priority::class.java))
                         clazz.getAnnotation(Priority::class.java).value
                     else
                         0
-                    val services = map["service"] as? MutableMap<Int, MutableList<Service>> ?: run {
-                        map["service"] = mutableMapOf<Int, MutableList<Service>>()
-                        map["service"] as MutableMap<Int, MutableList<Service>>
-                    }
-                    services[priority]?.add(service) ?: run {
-                        services[priority] = mutableListOf(service)
+                    preObject?.let { multiMap ->
+                        multiMap[priority].add(service)
                     }
                 }
             }
-            .postProcess { map ->
-                val services = map["service"] as? MutableMap<Int, MutableList<Service>> ?: return@postProcess
-                services.toSortedMap().forEach { (_, list) ->
-                    list.forEach { (plugin.services as MutableList<Service>).add(it) }
+            .postProcess { preObject ->
+                preObject?.let { multiMap ->
+                    multiMap.asMap().toSortedMap().forEach { (_, list) ->
+                        list.forEach { plugin.register(it) }
+                    }
                 }
             }
             .create()

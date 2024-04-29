@@ -9,7 +9,7 @@ import zinc.doiche.lib.brigadier.argument.RequiredArgument
 class StringArgument @JvmOverloads constructor(
     name: String,
     private val argumentType: StringArgumentType = StringArgumentType.word()
-) : RequiredArgument<String?>(name) {
+) : RequiredArgument<String>(name) {
     override fun argument(): RequiredArgumentBuilder<CommandSourceStack, String> {
         return RequiredArgumentBuilder.argument(name, argumentType)
     }

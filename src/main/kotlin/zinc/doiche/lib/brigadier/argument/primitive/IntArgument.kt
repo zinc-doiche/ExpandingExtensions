@@ -6,10 +6,10 @@ import net.minecraft.commands.CommandSourceStack
 import zinc.doiche.lib.brigadier.argument.RequiredArgument
 
 
-class IntArgument(name: String?) : RequiredArgument<Int>(name) {
+class IntArgument(name: String) : RequiredArgument<Int>(name) {
     private val bound = intArrayOf(Int.MIN_VALUE, Int.MAX_VALUE)
 
-    constructor(name: String?, min: Int, max: Int) : this(name) {
+    constructor(name: String, min: Int, max: Int) : this(name) {
         bound[0] = min
         bound[1] = max
     }
