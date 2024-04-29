@@ -1,6 +1,7 @@
 package zinc.doiche.lib.init
 
 import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.lib.log.LoggerUtil
 import java.io.File
 import java.nio.file.Paths
 import java.util.jar.JarFile
@@ -42,10 +43,10 @@ class ClassLoader {
         searchInProject { jarFile ->
             jarFile.versionedStream().forEach { jarEntry ->
                 val path = jarEntry.toString().replace('/', '.')
-                if(!path.startsWith(packageName) && !path.endsWith(".class")) {
-                    return@forEach
+                if(path.startsWith(packageName) && path.endsWith(".class")) {
+                    LoggerUtil.prefixedInfo(path)
+                    list.add(path)
                 }
-                list.add(path)
             }
         }
         return list

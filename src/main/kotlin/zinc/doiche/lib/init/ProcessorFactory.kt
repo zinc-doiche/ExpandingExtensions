@@ -26,8 +26,8 @@ interface ProcessorFactory<T> {
 
         fun listener(): Processor<Nothing> = factory<Nothing>()
             .process { clazz, _ ->
-                if(clazz.isAnnotationPresent(ListenerRegistry::class.java)
-                        && clazz.superclass.isAssignableFrom(Listener::class.java)) {
+                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && clazz.isAssignableFrom(Listener::class.java)
+                ) {
                     val listener = clazz.getDeclaredConstructor().newInstance() as Listener
                     plugin.register(listener)
                 }
@@ -67,7 +67,8 @@ interface ProcessorFactory<T> {
                 Multimaps.newListMultimap(mutableMapOf(), ::mutableListOf)
             }
             .process { clazz, preObject ->
-                if(clazz.superclass.isAssignableFrom(Service::class.java)) {
+                if(clazz != Service::class.java && clazz.isAssignableFrom(Service::class.java)) {
+                    LoggerUtil.prefixedInfo("class: ${clazz.simpleName}, Service")
                     val service = clazz.getDeclaredConstructor().newInstance() as Service
                     val priority = if(clazz.isAnnotationPresent(Priority::class.java))
                         clazz.getAnnotation(Priority::class.java).value

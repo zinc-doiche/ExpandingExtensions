@@ -16,7 +16,7 @@ class UserCommands {
     }
 
     @CommandFactory
-    fun menu(): Command = CommandBuilder.simple("profile") { _, player ->
+    fun menu(): Command = CommandBuilder.simple("menu") { _, player ->
         player.openInventory(Bukkit.createInventory(null, 54, Component.text("menu")))
         CommandBuilder.SINGLE_SUCCESS
     }

@@ -1,18 +1,16 @@
 package zinc.doiche.service.user.listener
 
-import com.destroystokyo.paper.event.player.PlayerJumpEvent
+import net.kyori.adventure.text.Component
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.annotation.ListenerRegistry
 import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.User
 import zinc.doiche.service.user.user
 import zinc.doiche.util.transaction
-import kotlin.time.measureTime
 
 @ListenerRegistry
 class UserIOListener: Listener {
@@ -23,7 +21,7 @@ class UserIOListener: Listener {
         if(event.loginResult != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
             return
         }
-        UserService.repository.run {
+        UserService.repository.runCatching {
             val user = findByUUID(uuid)?.apply {
                 period.update()
             } ?: User(uuid).apply {
@@ -31,24 +29,24 @@ class UserIOListener: Listener {
                     save(this)
                 }
             }
-            transaction {
-                user.levelHolder.addLevel()
-                saveID(uuid, user.id!!)
-            }
+            saveID(uuid, user.id!!)
+        }.onFailure {
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                Component.text("Data를 불러오는 데 실패했어요."))
         }
     }
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {}
 
-    @EventHandler
-    fun onJump(event: PlayerJumpEvent) {
-        val player = event.player
-        val user = player.user ?: return
-        val level = user.levelHolder.level
-
-        player.sendMessage("Level: $level")
-    }
+//    @EventHandler
+//    fun onJump(event: PlayerJumpEvent) {
+//        val player = event.player
+//        val user = player.user ?: return
+//        val level = user.levelHolder.level
+//
+//        player.sendMessage("Level: $level")
+//    }
 
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
