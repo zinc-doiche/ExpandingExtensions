@@ -29,7 +29,7 @@ class UserIOListener: Listener {
                     save(this)
                 }
             }
-            saveID(uuid, user.id!!)
+            saveId(uuid, user.id!!)
         }.onFailure {
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
                 Component.text("Data를 불러오는 데 실패했어요."))
@@ -55,7 +55,7 @@ class UserIOListener: Listener {
         transaction {
             UserService.repository.run {
                 save(user)
-                removeID(player.uniqueId)
+                removeId(player.uniqueId)
             }
         }
     }

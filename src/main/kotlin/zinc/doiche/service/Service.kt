@@ -1,4 +1,4 @@
-package zinc.doiche.lib.structure
+package zinc.doiche.service
 
 interface Service {
     fun onLoad()

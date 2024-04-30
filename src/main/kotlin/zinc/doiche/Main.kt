@@ -6,10 +6,12 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
+import redis.clients.jedis.JedisPooled
+import zinc.doiche.database.CachePoolProvider
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
-import zinc.doiche.lib.structure.Service
+import zinc.doiche.service.Service
 import zinc.doiche.lib.log.LoggerUtil
 import zinc.doiche.util.append
 import java.io.File
@@ -21,8 +23,13 @@ class Main: JavaPlugin() {
     }
 
     val entityManager: EntityManager by lazy {
-        val factory = DatabaseFactoryProvider.get() ?: throw RuntimeException("factory is null")
+        val factory = DatabaseFactoryProvider.get() ?: throw IllegalStateException("factory is null")
         factory.createEntityManager()
+    }
+
+    val jedisPooled: JedisPooled by lazy {
+        val pooled = CachePoolProvider.get() ?: throw IllegalStateException("pooled is null")
+        pooled
     }
 
     val query: JPAQueryFactory by lazy { JPAQueryFactory(entityManager) }
@@ -32,6 +39,7 @@ class Main: JavaPlugin() {
     override fun onLoad() {
         initPluginInst(this)
         DatabaseFactoryProvider.create()
+        CachePoolProvider.create()
         processAll()
         loadServices()
     }

@@ -1,11 +1,11 @@
 package zinc.doiche.service.item
 
-import zinc.doiche.lib.structure.Service
+import zinc.doiche.service.Service
 import zinc.doiche.service.item.repository.ItemDataRepository
 
-class ItemService: Service {
+class ItemDataService: Service {
     companion object {
-        val repository: ItemDataRepository by lazyOf(ItemDataRepository())
+        val repository: ItemDataRepository by lazyOf(ItemDataRepository("item"))
     }
 
     override fun onLoad() {

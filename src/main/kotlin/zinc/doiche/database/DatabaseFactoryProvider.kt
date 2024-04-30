@@ -27,37 +27,42 @@ object DatabaseFactoryProvider {
         val connectionConfig = plugin.config(CONNECTION_CONFIG_PATH).toObject(ConnectionConfig::class.java)
         val hikariConfig = plugin.config(HIKARI_CONFIG_PATH).toObject(HikariConfiguration::class.java)
         val hibernateConfig = plugin.config(HIBERNATE_CONFIG_PATH).toObject(HibernateConfig::class.java)
-        Thread.currentThread().contextClassLoader = javaClass.classLoader
         initEntityManagerFactory(connectionConfig, hikariConfig, hibernateConfig)
     }
 
-    private fun initEntityManagerFactory(
+    fun initEntityManagerFactory(
         connectionConfig: ConnectionConfig,
-        hikariConfig: HikariConfiguration,
+        hikariConfiguration: HikariConfiguration,
         hibernateConfig: HibernateConfig
-    ) {
+    ): EntityManagerFactory {
+        Thread.currentThread().contextClassLoader = javaClass.classLoader
+
         val hikariConfig = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
             jdbcUrl = connectionConfig.getURL()
             username = connectionConfig.username
             password = connectionConfig.password
-//            isAutoCommit = true
-            maximumPoolSize = hikariConfig.maximumPoolSize
-            minimumIdle = hikariConfig.minimumIdle
-            idleTimeout = hikariConfig.idleTimeout
-            connectionTimeout = hikariConfig.connectionTimeout
+            isAutoCommit = hibernateConfig.isAutoCommit
+            maximumPoolSize = hikariConfiguration.maximumPoolSize
+            minimumIdle = hikariConfiguration.minimumIdle
+            idleTimeout = hikariConfiguration.idleTimeout
+            connectionTimeout = hikariConfiguration.connectionTimeout
+
+            initializationFailTimeout = -1
         }
         val dataSource = HikariDataSource(hikariConfig)
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
             "hibernate.show_sql" to hibernateConfig.showSQL,
-            "hibernate.hbm2ddl.auto" to hibernateConfig.ddl,
+//            "hibernate.dialect" to "org.hibernate.dialect.PostgreSQLDialect",
+            "hibernate.hbm2ddl.auto" to hibernateConfig.hbm2ddl,
             "hibernate.cache.use_second_level_cache" to true,
             "hibernate.globally_quoted_identifiers" to true,
-            "hibernate.cache.region.factory_class" to "org.hibernate.cache.jcache.internal.JCacheRegionFactory",
+            "hibernate.cache.region.factory_class" to "org.hibernate.cache.jcache.internal.JCacheRegionFactory"
         )
 
         this.entityManagerFactory = Persistence.createEntityManagerFactory("database", properties)
+        return entityManagerFactory!!
     }
 
     data class ConnectionConfig(
@@ -79,6 +84,7 @@ object DatabaseFactoryProvider {
 
     data class HibernateConfig(
         val showSQL: Boolean,
-        val ddl: String
+        val hbm2ddl: String,
+        val isAutoCommit: Boolean
     )
 }

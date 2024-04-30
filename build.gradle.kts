@@ -5,7 +5,6 @@ plugins {
     kotlin("plugin.noarg") version "1.9.10"
     id("org.jetbrains.kotlin.jvm") version "1.9.10"
     id("io.papermc.paperweight.userdev") version "1.5.12"
-//    id("xyz.jpenilla.run-paper") version "2.2.2" // Adds runServer task for testing
 }
 
 allOpen {
@@ -28,7 +27,6 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
-//    paperweight.paperDevBundle("1.20.5-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation(kotlin("reflect"))
     compileOnly("com.google.code.gson:gson:2.10.1")
@@ -45,7 +43,6 @@ dependencies {
     implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
     implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
     implementation("org.ehcache:ehcache:3.10.0")
-
     implementation("com.zaxxer:HikariCP:5.1.0")
 
     implementation("com.querydsl:querydsl-core:5.0.0")
@@ -56,6 +53,13 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
     kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
     kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+
+    // JUnit Jupiter API and Engine dependencies
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+    // This dependency is used to enable more expressive tests
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
 }
 
 //의존성 탐색하도록 설정(duplicatesStrategy 설정시 필요)
@@ -64,9 +68,6 @@ configurations.implementation.configure {
 }
 
 tasks {
-//    reobfJar {
-//        outputJar = file("build/libs/${project.name}-${project.version}.jar")
-//    }
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(configurations.implementation.get().map {
@@ -84,6 +85,9 @@ tasks {
     }
     reobfJar {
         outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-${project.version}.jar"))
+    }
+    test {
+        useJUnitPlatform()
     }
 }
 

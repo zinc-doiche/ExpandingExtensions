@@ -1,4 +1,4 @@
-package zinc.doiche.lib.structure
+package zinc.doiche.service
 
 interface Repository<E: Any> {
     fun save(entity: E)

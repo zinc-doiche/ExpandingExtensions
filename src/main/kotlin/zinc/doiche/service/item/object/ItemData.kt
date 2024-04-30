@@ -2,12 +2,7 @@ package zinc.doiche.service.item.`object`
 
 import io.hypersistence.utils.hibernate.type.array.StringArrayType
 import io.hypersistence.utils.hibernate.type.json.JsonType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import net.kyori.adventure.text.minimessage.MiniMessage.miniMessage
 import net.minecraft.nbt.TagParser
 import org.bukkit.Material

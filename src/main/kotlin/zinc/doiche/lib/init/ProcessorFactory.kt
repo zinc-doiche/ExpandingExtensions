@@ -10,7 +10,7 @@ import org.bukkit.event.Listener
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.annotation.*
 import zinc.doiche.lib.log.LoggerUtil
-import zinc.doiche.lib.structure.Service
+import zinc.doiche.service.Service
 import zinc.doiche.util.append
 
 interface ProcessorFactory<T> {

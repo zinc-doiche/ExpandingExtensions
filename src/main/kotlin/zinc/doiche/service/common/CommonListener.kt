@@ -9,6 +9,7 @@ import zinc.doiche.lib.annotation.ListenerRegistry
 import zinc.doiche.lib.log.LoggerUtil.prefixed
 import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.QUser.user
+import zinc.doiche.service.user.repository.UserRepository
 
 @ListenerRegistry
 class CommonListener: Listener {
@@ -26,7 +27,7 @@ class CommonListener: Listener {
             idMap.forEach { tuple ->
                 val id = tuple.get(user.id)
                 val uuid = tuple.get(user.uuid)
-                UserService.repository.saveID(uuid!!, id!!)
+                UserService.repository.saveId(uuid!!, id!!)
             }
         }
     }

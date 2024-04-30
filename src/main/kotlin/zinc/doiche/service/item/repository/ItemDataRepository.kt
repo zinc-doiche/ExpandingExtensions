@@ -1,30 +1,48 @@
 package zinc.doiche.service.item.repository
 
-import redis.clients.jedis.Jedis
-import redis.clients.jedis.JedisFactory
+import jakarta.persistence.EntityManager
 import zinc.doiche.Main
-import zinc.doiche.lib.structure.Repository
+import zinc.doiche.database.DatabaseFactoryProvider
+import zinc.doiche.service.CachedKey
+import zinc.doiche.service.Repository
 import zinc.doiche.service.item.`object`.ItemData
 import zinc.doiche.service.item.`object`.QItemData.itemData
 
-class ItemDataRepository: Repository<ItemData> {
+class ItemDataRepository(
+    override val prefix: String
+) : Repository<ItemData>, CachedKey<String>() {
+    private val entityManager: EntityManager by lazy {
+        try {
+            Main.plugin.entityManager
+        } catch (e: Exception) {
+            DatabaseFactoryProvider.get()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
+        }
+    }
+
     override fun save(entity: ItemData) {
-        Main.plugin.entityManager.persist(entity)
+        entityManager.persist(entity)
     }
 
-    fun findByName(name: String): ItemData? {
-
-
-        return Main.plugin.query.selectFrom(itemData)
-            .where(itemData.name.eq(name))
-            .fetchFirst()
-    }
+    fun findByName(name: String): ItemData? = Main.plugin.query
+        .selectFrom(itemData)
+        .where(itemData.name.eq(name))
+        .fetchFirst()
 
     override fun findById(id: Long): ItemData? {
-        return Main.plugin.entityManager.find(ItemData::class.java, id)
+        return entityManager.find(ItemData::class.java, id)
     }
 
     override fun delete(entity: ItemData) {
-        Main.plugin.entityManager.remove(entity)
+        removeId(entity.name)
+        entityManager.remove(entity)
+    }
+
+    fun findByNameInCache(name: String): ItemData? {
+        val id = getId(name) ?: run {
+            return findByName(name)?.apply {
+                saveId(name, this.id!!)
+            }
+        }
+        return findById(id)
     }
 }
