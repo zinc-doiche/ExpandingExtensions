@@ -8,58 +8,77 @@ import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.util.toObject
 
 object DatabaseFactoryProvider {
+    private const val CONNECTION_CONFIG_PATH = "database/connection.json"
+    private const val HIKARI_CONFIG_PATH = "database/hikari.json"
+    private const val HIBERNATE_CONFIG_PATH = "database/hibernate.json"
+
     private var entityManagerFactory: EntityManagerFactory? = null
 
-    fun get() = entityManagerFactory ?: create()
+    fun get() = entityManagerFactory
 
     fun close() {
         entityManagerFactory?.close()
     }
 
-    private fun create(): EntityManagerFactory {
-        val config = plugin.config("database.json").toObject(Config::class.java)
+    fun create() {
+        if(entityManagerFactory != null) {
+            return
+        }
+        val connectionConfig = plugin.config(CONNECTION_CONFIG_PATH).toObject(ConnectionConfig::class.java)
+        val hikariConfig = plugin.config(HIKARI_CONFIG_PATH).toObject(HikariConfiguration::class.java)
+        val hibernateConfig = plugin.config(HIBERNATE_CONFIG_PATH).toObject(HibernateConfig::class.java)
         Thread.currentThread().contextClassLoader = javaClass.classLoader
-//        Thread.currentThread().contextClassLoader = PluginClassLoader.getSystemClassLoader()
-        return initEntityManagerFactory(config)
+        initEntityManagerFactory(connectionConfig, hikariConfig, hibernateConfig)
     }
 
-    private fun initEntityManagerFactory(config: Config): EntityManagerFactory {
+    private fun initEntityManagerFactory(
+        connectionConfig: ConnectionConfig,
+        hikariConfig: HikariConfiguration,
+        hibernateConfig: HibernateConfig
+    ) {
         val hikariConfig = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
-            jdbcUrl = config.getURL()
-            username = config.username
-            password = config.password
+            jdbcUrl = connectionConfig.getURL()
+            username = connectionConfig.username
+            password = connectionConfig.password
 //            isAutoCommit = true
-
-            maximumPoolSize = 10
-            minimumIdle = 5
-            idleTimeout = 60000 * 5
-            connectionTimeout = 60000
+            maximumPoolSize = hikariConfig.maximumPoolSize
+            minimumIdle = hikariConfig.minimumIdle
+            idleTimeout = hikariConfig.idleTimeout
+            connectionTimeout = hikariConfig.connectionTimeout
         }
         val dataSource = HikariDataSource(hikariConfig)
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
-            "hibernate.show_sql" to config.showSQL,
-            "hibernate.hbm2ddl.auto" to config.ddl,
+            "hibernate.show_sql" to hibernateConfig.showSQL,
+            "hibernate.hbm2ddl.auto" to hibernateConfig.ddl,
             "hibernate.cache.use_second_level_cache" to true,
             "hibernate.globally_quoted_identifiers" to true,
             "hibernate.cache.region.factory_class" to "org.hibernate.cache.jcache.internal.JCacheRegionFactory",
         )
 
-        val managerFactory = Persistence.createEntityManagerFactory("database", properties)
-        entityManagerFactory = managerFactory
-        return managerFactory
+        this.entityManagerFactory = Persistence.createEntityManagerFactory("database", properties)
     }
 
-    data class Config(
+    data class ConnectionConfig(
         val host: String,
         val port: Int,
         val database: String,
         val username: String,
         val password: String,
-        val showSQL: String,
-        val ddl: String
     ) {
         fun getURL(): String = "jdbc:postgresql://$host:$port/$database"
     }
+
+    data class HikariConfiguration(
+        val maximumPoolSize: Int,
+        val minimumIdle: Int,
+        val idleTimeout: Long,
+        val connectionTimeout: Long
+    )
+
+    data class HibernateConfig(
+        val showSQL: Boolean,
+        val ddl: String
+    )
 }

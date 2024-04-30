@@ -1,17 +1,19 @@
 package zinc.doiche.service.item
 
 import zinc.doiche.lib.structure.Service
+import zinc.doiche.service.item.repository.ItemDataRepository
 
 class ItemService: Service {
+    companion object {
+        val repository: ItemDataRepository by lazyOf(ItemDataRepository())
+    }
+
     override fun onLoad() {
-        TODO("Not yet implemented")
     }
 
     override fun onEnable() {
-        TODO("Not yet implemented")
     }
 
     override fun onDisable() {
-        TODO("Not yet implemented")
     }
 }

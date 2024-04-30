@@ -18,13 +18,12 @@ class Main: JavaPlugin() {
     internal companion object {
         lateinit var plugin: Main
             private set
-
-        private fun initPluginInst(plugin: Main) {
-            this.plugin = plugin
-        }
     }
 
-    val entityManager: EntityManager by lazy { DatabaseFactoryProvider.get().createEntityManager() }
+    val entityManager: EntityManager by lazy {
+        val factory = DatabaseFactoryProvider.get() ?: throw RuntimeException("factory is null")
+        factory.createEntityManager()
+    }
 
     val query: JPAQueryFactory by lazy { JPAQueryFactory(entityManager) }
 
@@ -32,7 +31,7 @@ class Main: JavaPlugin() {
 
     override fun onLoad() {
         initPluginInst(this)
-        initEntityManager()
+        DatabaseFactoryProvider.create()
         processAll()
         loadServices()
     }
@@ -71,17 +70,15 @@ class Main: JavaPlugin() {
             .process()
     }
 
+    private fun initPluginInst(plugin: Main) {
+        Main.plugin = plugin
+    }
+
     private fun loadServices() {
         for (service in services) {
             LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
                 .append("Loading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
             service.onLoad()
-        }
-    }
-
-    private fun initEntityManager() {
-        if(entityManager.isOpen) {
-            LoggerUtil.prefixedInfo("DB 연결 완료.")
         }
     }
 }
