@@ -29,6 +29,7 @@ dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation(kotlin("reflect"))
+    implementation("org.reflections:reflections:0.9.12")
     compileOnly("com.google.code.gson:gson:2.10.1")
     implementation("org.postgresql:postgresql:42.7.3")
     implementation("redis.clients:jedis:5.1.2")

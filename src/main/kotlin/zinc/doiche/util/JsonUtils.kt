@@ -15,6 +15,6 @@ internal fun <T> String.deserialize(clazz: Class<T>) = gson.fromJson(this, clazz
 internal fun String.asMapJava() = gson.fromJson(this, mapTypeOf(String::class.java, JvmType.Object::class.java)) as Map<String, JvmType.Object>
 
 @Suppress("UNCHECKED_CAST")
-internal fun String.asMap() = gson.fromJson(this, mapTypeOf(String::class.java, JvmType.Object::class.java)) as Map<String, Any>
+internal fun String.asMap() = gson.fromJson(this, mapTypeOf(String::class.java, JvmType.Object::class.java)) as MutableMap<String, Any>
 
 internal fun <K, V> mapTypeOf(key: Class<K>, value: Class<V>) = TypeToken.getParameterized(Map::class.java, key, value)

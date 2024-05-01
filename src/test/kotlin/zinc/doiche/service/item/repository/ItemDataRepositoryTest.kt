@@ -22,10 +22,10 @@ class ItemDataRepositoryTest {
             "test",
             Material.PAPER,
             "<rainbow>무지개색총공격이다!",
-            listOf(
+            mutableListOf(
                 "<bold>굵은 로어"
             ),
-            mapOf(
+            mutableMapOf(
                 "key" to 1234
             )
         )
@@ -41,7 +41,8 @@ class ItemDataRepositoryTest {
 
     @Test
     fun findByName() {
-
+        val findOne = repository.findByName("test")
+        assert(findOne?.name == "test")
     }
 
     @Test

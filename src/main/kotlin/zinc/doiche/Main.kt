@@ -9,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import redis.clients.jedis.JedisPooled
 import zinc.doiche.database.CachePoolFactory
 import zinc.doiche.database.DatabaseFactoryProvider
+import zinc.doiche.database.SessionFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.service.Service
@@ -38,6 +39,7 @@ class Main: JavaPlugin() {
     override fun onLoad() {
         initPluginInst(this)
         DatabaseFactoryProvider.create()
+        SessionFactoryProvider.create()
         initJedisPooled()
         processAll()
         loadServices()

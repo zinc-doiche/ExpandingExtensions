@@ -24,6 +24,8 @@ internal fun ItemStack.toData(name: String = this.type.name) = ItemData(
     name,
     this.type,
     this.itemMeta.displayName()?.let { MiniMessage.miniMessage().serialize(it) } ?: "",
-    this.lore()?.map { MiniMessage.miniMessage().serialize(it) } ?: emptyList(),
-    tag?.asString?.asMap() ?: emptyMap()
+    this.lore()?.map {
+        MiniMessage.miniMessage().serialize(it)
+    }?.toMutableList() ?: mutableListOf(),
+    tag?.asString?.asMap() ?: mutableMapOf()
 )

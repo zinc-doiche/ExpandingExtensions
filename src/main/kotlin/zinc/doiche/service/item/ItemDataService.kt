@@ -18,8 +18,8 @@ class ItemDataService: Service {
             "test",
             Material.PAPER,
             "<aqua><b>DISPLAY",
-            listOf("<red>LORE"),
-            mapOf("key" to "value")
+            mutableListOf("<red>LORE"),
+            mutableMapOf("key" to "value")
         )
         repository.save(data)
         val result = repository.findById(data.id!!)

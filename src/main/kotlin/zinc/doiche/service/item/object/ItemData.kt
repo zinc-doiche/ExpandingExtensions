@@ -25,11 +25,11 @@ class ItemData(
 
     @Type(StringArrayType::class)
     @Column(nullable = false)
-    val lore: List<String> = emptyList(),
+    val lore: MutableList<String> = mutableListOf(),
 
     @Type(JsonType::class)
     @Column(nullable = false, columnDefinition = "json")
-    val tags: Map<String, Any> = emptyMap()
+    val tags: MutableMap<String, Any> = mutableMapOf()
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

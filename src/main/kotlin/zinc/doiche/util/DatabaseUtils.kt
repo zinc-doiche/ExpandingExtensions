@@ -1,19 +1,18 @@
 package zinc.doiche.util
 
-import jakarta.persistence.EntityManager
 import jakarta.persistence.EntityTransaction
 import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.database.SessionFactoryProvider
 
-internal fun transaction(block: (EntityTransaction) -> Unit) = plugin.entityManager.transaction(block)
-
-internal fun EntityManager.transaction(block: (EntityTransaction) -> Unit) = transaction.run {
+internal inline fun transaction(crossinline block: (EntityTransaction) -> Unit) = SessionFactoryProvider.get()?.inTransaction { session ->
+    val transaction = session.transaction
     runCatching {
-        begin()
-        block(this)
+        transaction.begin()
+        block(transaction)
     }.onFailure {
         plugin.slF4JLogger.warn("트랜잭션 중 실패. Rollback 실행.")
-        rollback()
+        transaction.rollback()
     }.onSuccess {
-        commit()
+        transaction.commit()
     }
 }
