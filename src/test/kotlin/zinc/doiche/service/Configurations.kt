@@ -1,6 +1,6 @@
 package zinc.doiche.service
 
-import zinc.doiche.database.CachePoolProvider
+import zinc.doiche.database.CachePoolFactory
 import zinc.doiche.database.DatabaseFactoryProvider
 
 val hikariConfiguration = DatabaseFactoryProvider.HikariConfiguration(
@@ -19,11 +19,12 @@ val connectionConfig = DatabaseFactoryProvider.ConnectionConfig(
     5432,
     "postgres",
     "postgres",
-    "postgres"
+    "1234"
 )
-val cacheConfig = CachePoolProvider.CacheConfig(
+val cacheConfig = CachePoolFactory.CacheConfig(
     "localhost",
     6379,
+    "veiowb38hf",
     4,
     4,
     0,

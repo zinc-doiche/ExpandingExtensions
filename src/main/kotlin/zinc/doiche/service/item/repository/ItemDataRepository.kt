@@ -37,7 +37,7 @@ class ItemDataRepository(
         entityManager.remove(entity)
     }
 
-    fun findByNameInCache(name: String): ItemData? {
+    fun findCachedByName(name: String): ItemData? {
         val id = getId(name) ?: run {
             return findByName(name)?.apply {
                 saveId(name, this.id!!)

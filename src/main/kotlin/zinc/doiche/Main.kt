@@ -7,7 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import redis.clients.jedis.JedisPooled
-import zinc.doiche.database.CachePoolProvider
+import zinc.doiche.database.CachePoolFactory
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
@@ -28,18 +28,17 @@ class Main: JavaPlugin() {
     }
 
     val jedisPooled: JedisPooled by lazy {
-        val pooled = CachePoolProvider.get() ?: throw IllegalStateException("pooled is null")
-        pooled
+        CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
     }
 
-    val query: JPAQueryFactory by lazy { JPAQueryFactory(entityManager) }
+    val query: JPAQueryFactory by lazyOf(JPAQueryFactory(entityManager))
 
     private val services: MutableList<Service> = mutableListOf()
 
     override fun onLoad() {
         initPluginInst(this)
         DatabaseFactoryProvider.create()
-        CachePoolProvider.create()
+        initJedisPooled()
         processAll()
         loadServices()
     }
@@ -50,14 +49,17 @@ class Main: JavaPlugin() {
 
     override fun onDisable() {
         services.forEach(Service::onDisable)
+        jedisPooled.close()
         DatabaseFactoryProvider.close()
         entityManager.close()
     }
 
-    fun config(name: String): File = File(dataFolder, name).apply {
+    fun config(name: String): File = File(dataFolder, name).let {
         if (!file.exists()) {
-            saveResource(name, false)
+            file.mkdirs()
+            saveResource(name, true)
         }
+        File(dataFolder, name)
     }
 
     fun register(listener: Listener) {
@@ -80,6 +82,10 @@ class Main: JavaPlugin() {
 
     private fun initPluginInst(plugin: Main) {
         Main.plugin = plugin
+    }
+
+    private fun initJedisPooled() {
+        jedisPooled.ping()
     }
 
     private fun loadServices() {

@@ -1,6 +1,7 @@
 {
     "host": "localhost",
     "port": 6379,
+    "password": "cool passwd",
     "maxTotal": 4,
     "maxIdle": 4,
     "minIdle": 0,

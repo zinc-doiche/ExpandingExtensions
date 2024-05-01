@@ -2,15 +2,15 @@ package zinc.doiche.service
 
 import redis.clients.jedis.JedisPooled
 import zinc.doiche.Main
-import zinc.doiche.database.CachePoolProvider
+import zinc.doiche.database.CachePoolFactory
 
 abstract class CachedKey<I> {
-    abstract val prefix: String
-    val jedisPooled: JedisPooled by lazy {
+    protected abstract val prefix: String
+    private val jedisPooled: JedisPooled by lazy {
         try {
             Main.plugin.jedisPooled
         } catch (e: Exception) {
-            CachePoolProvider.get() ?: throw IllegalStateException("jedis pooled is null")
+            CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
         }
     }
 
