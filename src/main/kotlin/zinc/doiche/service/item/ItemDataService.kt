@@ -18,7 +18,7 @@ class ItemDataService: Service {
             "test",
             Material.PAPER,
             "<aqua><b>DISPLAY",
-            mutableListOf("<red>LORE"),
+            arrayOf("<red>LORE"),
             mutableMapOf("key" to "value")
         )
         repository.save(data)

@@ -9,5 +9,5 @@ internal fun init() {
         connectionConfig, hikariConfiguration, hibernateConfig
     )
     CachePoolFactory.initConfig(cacheConfig)
-    SessionFactoryProvider.create()
+//    SessionFactoryProvider.create()
 }

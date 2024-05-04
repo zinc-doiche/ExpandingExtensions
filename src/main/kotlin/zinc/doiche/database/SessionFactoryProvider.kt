@@ -12,22 +12,22 @@ object SessionFactoryProvider {
 
     fun create() {
         try {
-            val configuration = Configuration()
-
             // Get all classes in the 'zinc.doiche' package that are annotated with @Entity
             val reflections = Reflections("zinc.doiche")
             val entityClasses = reflections.getTypesAnnotatedWith(Entity::class.java)
 
-            // Add all entity classes to the configuration
-            for (entityClass in entityClasses) {
-                configuration.addAnnotatedClass(entityClass)
+            sessionFactory = Configuration().run {
+                // Add all entity classes to the configuration
+                for (entityClass in entityClasses) {
+                    addAnnotatedClass(entityClass)
+                }
+
+                val serviceRegistry: ServiceRegistry = StandardServiceRegistryBuilder()
+                    .applySettings(this.properties)
+                    .build()
+
+                buildSessionFactory(serviceRegistry)
             }
-
-            val serviceRegistry: ServiceRegistry = StandardServiceRegistryBuilder()
-                .applySettings(configuration.properties)
-                .build()
-
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry)
         } catch (ex: Throwable) {
             throw ExceptionInInitializerError(ex)
         }

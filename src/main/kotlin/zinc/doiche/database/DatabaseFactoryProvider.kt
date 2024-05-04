@@ -2,8 +2,13 @@ package zinc.doiche.database
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import jakarta.persistence.Entity
 import jakarta.persistence.EntityManagerFactory
-import jakarta.persistence.Persistence
+import org.hibernate.boot.MetadataSources
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder
+import org.hibernate.cfg.Configuration
+import org.hibernate.service.ServiceRegistry
+import org.reflections.Reflections
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.util.toObject
 
@@ -54,14 +59,29 @@ object DatabaseFactoryProvider {
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
             "hibernate.show_sql" to hibernateConfig.showSQL,
-//            "hibernate.dialect" to "org.hibernate.dialect.PostgreSQLDialect",
+            "hibernate.dialect" to "org.hibernate.dialect.PostgreSQLDialect",
             "hibernate.hbm2ddl.auto" to hibernateConfig.hbm2ddl,
             "hibernate.cache.use_second_level_cache" to true,
             "hibernate.globally_quoted_identifiers" to true,
             "hibernate.cache.region.factory_class" to "org.hibernate.cache.jcache.internal.JCacheRegionFactory"
         )
+        val reflections = Reflections("zinc.doiche")
+        val entityClasses = reflections.getTypesAnnotatedWith(Entity::class.java)
 
-        this.entityManagerFactory = Persistence.createEntityManagerFactory("database", properties)
+        this.entityManagerFactory = Configuration().run {
+            // Add all entity classes to the configuration
+            for (entityClass in entityClasses) {
+                addAnnotatedClass(entityClass)
+            }
+            this.properties.putAll(properties)
+            val serviceRegistry: ServiceRegistry = StandardServiceRegistryBuilder()
+                .applySettings(this.properties)
+                .build()
+            val metaDataSource = MetadataSources(serviceRegistry)
+            metaDataSource
+            buildSessionFactory(serviceRegistry)
+        }
+//        this.entityManagerFactory = Persistence.createEntityManagerFactory("database", properties)
         return entityManagerFactory!!
     }
 

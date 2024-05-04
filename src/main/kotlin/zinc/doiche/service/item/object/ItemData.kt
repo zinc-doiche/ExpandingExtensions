@@ -7,7 +7,10 @@ import net.kyori.adventure.text.minimessage.MiniMessage.miniMessage
 import net.minecraft.nbt.TagParser
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
+import org.hibernate.annotations.JdbcType
+import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.annotations.Type
+import org.hibernate.type.SqlTypes
 import zinc.doiche.util.serialize
 import zinc.doiche.util.setTag
 
@@ -23,11 +26,13 @@ class ItemData(
     @Column(nullable = false)
     val displayName: String,
 
-    @Type(StringArrayType::class)
+//    @Type(StringArrayType::class)
+    @Convert(converter = AttributeConverter::class)
     @Column(nullable = false)
-    val lore: MutableList<String> = mutableListOf(),
+    var lore: Array<String> = emptyArray<String>(),
 
-    @Type(JsonType::class)
+//    @Type(JsonType::class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "json")
     val tags: MutableMap<String, Any> = mutableMapOf()
 ) {

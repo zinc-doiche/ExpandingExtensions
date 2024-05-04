@@ -21,9 +21,10 @@ class ItemDataRepositoryTest {
         val itemData = ItemData(
             "test",
             Material.PAPER,
-            "<rainbow>무지개색총공격이다!",
-            mutableListOf(
-                "<bold>굵은 로어"
+            "<!i><rainbow>test test test",
+            arrayOf(
+                "<!i><white><bold>bold lore",
+                "<!i><white><bold>bold lore"
             ),
             mutableMapOf(
                 "key" to 1234

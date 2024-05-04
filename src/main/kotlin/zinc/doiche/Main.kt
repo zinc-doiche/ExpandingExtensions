@@ -39,7 +39,7 @@ class Main: JavaPlugin() {
     override fun onLoad() {
         initPluginInst(this)
         DatabaseFactoryProvider.create()
-        SessionFactoryProvider.create()
+//        SessionFactoryProvider.create()
         initJedisPooled()
         processAll()
         loadServices()
