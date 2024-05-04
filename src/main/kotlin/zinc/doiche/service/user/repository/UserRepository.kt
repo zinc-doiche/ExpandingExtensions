@@ -1,25 +1,14 @@
 package zinc.doiche.service.user.repository
 
-import jakarta.persistence.EntityManager
 import org.bukkit.entity.Player
-import zinc.doiche.Main.Companion.plugin
-import zinc.doiche.database.DatabaseFactoryProvider
-import zinc.doiche.service.CachedKey
-import zinc.doiche.service.Repository
+import zinc.doiche.service.CachedKeyRepository
 import zinc.doiche.service.user.`object`.QUser.user
 import zinc.doiche.service.user.`object`.User
 import java.util.*
 
 class UserRepository(
     override val prefix: String
-): Repository<User>, CachedKey<UUID>() {
-    private val entityManager: EntityManager by lazy {
-        try {
-            plugin.entityManager
-        } catch (e: Exception) {
-            DatabaseFactoryProvider.get()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
-        }
-    }
+): CachedKeyRepository<UUID, User>() {
 
     override fun save(entity: User) {
         entityManager.persist(entity)
@@ -27,7 +16,7 @@ class UserRepository(
 
     override fun findById(id: Long): User? = entityManager.find(User::class.java, id)
 
-    fun findByUUID(uuid: UUID): User? = plugin.query
+    fun findByUUID(uuid: UUID): User? = query
         .select(user)
         .from(user)
         .where(user.uuid.eq(uuid))

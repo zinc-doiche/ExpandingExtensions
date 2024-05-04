@@ -43,4 +43,8 @@ class User(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
+
+    override fun toString(): String {
+        return "User(uuid=$uuid, levelHolder=$levelHolder, period=$period, id=$id)"
+    }
 }

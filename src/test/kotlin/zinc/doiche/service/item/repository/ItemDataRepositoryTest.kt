@@ -1,25 +1,21 @@
 package zinc.doiche.service.item.repository
 
 import org.bukkit.Material
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import zinc.doiche.service.RepositoryTest
 
-import zinc.doiche.service.init
 import zinc.doiche.service.item.ItemDataService
 import zinc.doiche.service.item.`object`.ItemData
 
-class ItemDataRepositoryTest {
-    private val repository: ItemDataRepository by lazyOf(ItemDataService.repository)
+class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
+    override val repository = ItemDataService.repository
+    override val logger: Logger = LoggerFactory.getLogger(ItemDataRepositoryTest::class.java)
 
-    @BeforeEach
-    fun setUp() {
-        init()
-    }
-
-    @Test
-    fun save() {
+    private fun saveOne(name: String): ItemData {
         val itemData = ItemData(
-            "test",
+            name,
             Material.PAPER,
             "<!i><rainbow>test test test",
             arrayOf(
@@ -30,31 +26,62 @@ class ItemDataRepositoryTest {
                 "key" to 1234
             )
         )
+        repository.transaction {
+            repository.save(itemData)
+        }
+        return itemData
+    }
 
-        repository.save(itemData)
-
+    @Test
+    fun save() {
+        val itemData = saveOne("save")
         val findOne = repository.findById(itemData.id!!)
-        assert(itemData == findOne)
 
-        val findOneByName = repository.findByName(itemData.name)
-        assert(itemData == findOneByName)
+        logger.info("findOne: $findOne")
+        logger.info("itemData: $itemData")
+        assert(itemData == findOne)
     }
 
     @Test
     fun findByName() {
-        val findOne = repository.findByName("test")
-        assert(findOne?.name == "test")
+        val itemData = saveOne("findByName")
+        repository.transaction {
+            repository.save(itemData)
+        }
+        val findByName = repository.findByName("findByName")
+        logger.info("findByName: $findByName")
+        logger.info("itemData: $itemData")
+        assert(findByName == itemData)
     }
 
     @Test
     fun findById() {
+        val itemData = saveOne("findById")
+        repository.transaction {
+            repository.save(itemData)
+        }
+        val findOne = repository.findById(itemData.id!!)
+        logger.info("findOne: $findOne")
+        logger.info("itemData: $itemData")
+        assert(itemData == findOne)
     }
 
     @Test
     fun delete() {
-    }
+        val itemData = saveOne("delete")
+        repository.transaction {
+            repository.save(itemData)
+        }
+        val findOne = repository.findById(itemData.id!!)
+        logger.info("findOne: $findOne")
+        logger.info("itemData: $itemData")
+        assert(itemData == findOne)
 
-    @Test
-    fun getPrefix() {
+        repository.transaction {
+            repository.delete(itemData)
+        }
+        val findAfterDelete = repository.findById(itemData.id!!)
+        logger.info("findAfterDelete: $findAfterDelete")
+        assert(findAfterDelete == null)
     }
 }

@@ -1,16 +1,13 @@
 package zinc.doiche.service.item.`object`
 
-import io.hypersistence.utils.hibernate.type.array.StringArrayType
-import io.hypersistence.utils.hibernate.type.json.JsonType
 import jakarta.persistence.*
 import net.kyori.adventure.text.minimessage.MiniMessage.miniMessage
 import net.minecraft.nbt.TagParser
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import org.hibernate.annotations.JdbcType
 import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.annotations.Type
 import org.hibernate.type.SqlTypes
+import zinc.doiche.database.StringArrayConverter
 import zinc.doiche.util.serialize
 import zinc.doiche.util.setTag
 
@@ -26,12 +23,10 @@ class ItemData(
     @Column(nullable = false)
     val displayName: String,
 
-//    @Type(StringArrayType::class)
-    @Convert(converter = AttributeConverter::class)
+    @Convert(converter = StringArrayConverter::class, attributeName = "lore")
     @Column(nullable = false)
     var lore: Array<String> = emptyArray<String>(),
 
-//    @Type(JsonType::class)
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "json")
     val tags: MutableMap<String, Any> = mutableMapOf()
@@ -61,5 +56,9 @@ class ItemData(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
+    }
+
+    override fun toString(): String {
+        return "ItemData(name='$name', material=$material, displayName='$displayName', lore=${lore.contentToString()}, tags=$tags, id=$id)"
     }
 }

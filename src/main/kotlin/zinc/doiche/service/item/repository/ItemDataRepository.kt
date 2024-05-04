@@ -1,29 +1,17 @@
 package zinc.doiche.service.item.repository
 
-import jakarta.persistence.EntityManager
-import zinc.doiche.Main
-import zinc.doiche.database.DatabaseFactoryProvider
-import zinc.doiche.service.CachedKey
-import zinc.doiche.service.Repository
+import zinc.doiche.service.CachedKeyRepository
 import zinc.doiche.service.item.`object`.ItemData
 import zinc.doiche.service.item.`object`.QItemData.itemData
 
 class ItemDataRepository(
     override val prefix: String
-) : Repository<ItemData>, CachedKey<String>() {
-    private val entityManager: EntityManager by lazy {
-        try {
-            Main.plugin.entityManager
-        } catch (e: Exception) {
-            DatabaseFactoryProvider.get()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
-        }
-    }
-
+) : CachedKeyRepository<String, ItemData>() {
     override fun save(entity: ItemData) {
         entityManager.persist(entity)
     }
 
-    fun findByName(name: String): ItemData? = Main.plugin.query
+    fun findByName(name: String): ItemData? = query
         .selectFrom(itemData)
         .where(itemData.name.eq(name))
         .fetchFirst()

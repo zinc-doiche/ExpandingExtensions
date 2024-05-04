@@ -4,9 +4,10 @@ import redis.clients.jedis.JedisPooled
 import zinc.doiche.Main
 import zinc.doiche.database.CachePoolFactory
 
-abstract class CachedKey<I> {
+abstract class CachedKeyRepository<I, E>: Repository<E>() {
     protected abstract val prefix: String
-    private val jedisPooled: JedisPooled by lazy {
+
+    protected val jedisPooled: JedisPooled by lazy {
         try {
             Main.plugin.jedisPooled
         } catch (e: Exception) {

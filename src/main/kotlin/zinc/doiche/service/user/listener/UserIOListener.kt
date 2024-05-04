@@ -52,8 +52,8 @@ class UserIOListener: Listener {
     fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         val user = player.user ?: return
-        transaction {
-            UserService.repository.run {
+        UserService.repository.run {
+            transaction {
                 save(user)
                 removeId(player.uniqueId)
             }

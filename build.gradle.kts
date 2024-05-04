@@ -41,7 +41,7 @@ dependencies {
 //    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
 //        exclude(group = "org.slf4j", module = "slf4j-api")
 //    }
-    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
+//    implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.7.3")
     implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
     implementation("org.ehcache:ehcache:3.10.0")
     implementation("com.zaxxer:HikariCP:5.1.0")

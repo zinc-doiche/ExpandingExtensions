@@ -1,13 +1,18 @@
 package zinc.doiche.database
 
 import jakarta.persistence.AttributeConverter
+import jakarta.persistence.Converter
 
-class StringArrayConverter: AttributeConverter<Array<String>, String>{
+@Converter(autoApply = true)
+class StringArrayConverter : AttributeConverter<Array<String>, String> {
     override fun convertToDatabaseColumn(attribute: Array<String>): String {
-        TODO("Not yet implemented")
+        return attribute.joinToString()
     }
 
     override fun convertToEntityAttribute(dbData: String): Array<String> {
-        TODO("Not yet implemented")
+        if (dbData.trim { it <= ' ' }.isEmpty()) {
+            return emptyArray()
+        }
+        return dbData.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
     }
 }
