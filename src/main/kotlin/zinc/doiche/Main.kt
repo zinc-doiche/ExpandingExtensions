@@ -15,6 +15,7 @@ import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.service.Service
 import zinc.doiche.lib.log.LoggerUtil
 import zinc.doiche.util.append
+import zinc.doiche.util.gson
 import java.io.File
 
 class Main: SuspendingJavaPlugin() {
@@ -32,13 +33,15 @@ class Main: SuspendingJavaPlugin() {
         CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
     }
 
-    val query: JPAQueryFactory by lazyOf(JPAQueryFactory(entityManager))
+    val query: JPAQueryFactory by lazy {
+        JPAQueryFactory(entityManager)
+    }
 
     private val services: MutableList<Service> = mutableListOf()
 
     override suspend fun onLoadAsync() {
-        LoggerUtil.init(slF4JLogger)
         initPluginInst(this)
+        LoggerUtil.init(slF4JLogger)
         DatabaseFactoryProvider.create()
         initJedisPooled()
         processAll()
@@ -50,18 +53,20 @@ class Main: SuspendingJavaPlugin() {
     }
 
     override suspend fun onDisableAsync() {
-        services.forEach(Service::onDisable)
+        services.forEach { service ->
+            LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
+                .append("Unloading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
+            service.onDisable()
+        }
         jedisPooled.close()
         DatabaseFactoryProvider.close()
         entityManager.close()
     }
 
-    fun config(name: String): File = File(dataFolder, name).let {
-        if (!file.exists()) {
-            file.mkdirs()
-            saveResource(name, true)
+    fun config(name: String): File = File(dataFolder, name).apply {
+        if (!exists()) {
+            saveResource(name, false)
         }
-        File(dataFolder, name)
     }
 
     fun register(listener: Listener) {

@@ -19,17 +19,17 @@ abstract class Repository<E> {
         }
     }
 
-    fun transaction(block: Repository<E>.(EntityManager) -> Unit) {
-        entityManager.transaction {
-            block(this, entityManager)
-        }
-    }
-
     protected val query: JPAQueryFactory by lazy {
         try {
             Main.plugin.query
         } catch (e: Exception) {
             JPAQueryFactory(entityManager)
+        }
+    }
+
+    fun transaction(block: Repository<E>.(EntityManager) -> Unit) {
+        entityManager.transaction {
+            block(this, entityManager)
         }
     }
 }

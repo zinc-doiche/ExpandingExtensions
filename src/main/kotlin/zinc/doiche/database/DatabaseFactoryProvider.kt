@@ -1,9 +1,12 @@
 package zinc.doiche.database
 
+import com.github.shynixn.mccoroutine.bukkit.launch
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityManagerFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.hibernate.cfg.Configuration
@@ -40,7 +43,7 @@ object DatabaseFactoryProvider {
         hikariConfiguration: HikariConfiguration,
         hibernateConfig: HibernateConfig
     ): EntityManagerFactory {
-        Thread.currentThread().contextClassLoader = javaClass.classLoader
+//        Thread.currentThread().contextClassLoader = javaClass.classLoader
 
         val hikariConfig = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
