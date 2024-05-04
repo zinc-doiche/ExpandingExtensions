@@ -14,7 +14,7 @@ import zinc.doiche.database.`object`.Period
 import java.util.*
 
 @Entity
-@Table(name = "USER")
+@Table(name = "TBL_USER")
 class User(
     @Column(unique = true)
     val uuid: UUID,

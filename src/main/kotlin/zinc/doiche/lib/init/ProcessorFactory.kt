@@ -64,9 +64,8 @@ interface ProcessorFactory<T> {
 
         private fun logCommand(command: Command) = LoggerUtil.prefixedInfo(text("[")
             .append("Command", NamedTextColor.LIGHT_PURPLE)
-            .append("] ")
-            .append(command.name)
-            .appendSpace()
+            .append("] Registering ")
+            .append("'${command.name}' ~")
             .append(command.aliases.toString()))
 
         fun service(): Processor<Multimap<Int, Service>> = factory<Multimap<Int, Service>>()

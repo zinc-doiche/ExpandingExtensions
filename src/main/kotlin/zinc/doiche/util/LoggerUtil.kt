@@ -4,6 +4,8 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
+import org.hibernate.Hibernate
+import org.jboss.logging.LoggerProvider
 import org.slf4j.Logger
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.TranslateRegistry
@@ -22,6 +24,7 @@ object LoggerUtil {
             throw IllegalStateException("LoggerUtil is already initialized.")
         }
         LoggerUtil.logger = logger
+
     }
 
     fun prefixed(component: Component) = prefix.append(component)

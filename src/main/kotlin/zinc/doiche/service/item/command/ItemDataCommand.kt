@@ -11,6 +11,7 @@ import zinc.doiche.lib.brigadier.CommandBuilder
 import zinc.doiche.util.LoggerUtil
 import zinc.doiche.service.item.ItemDataService
 import zinc.doiche.util.append
+import zinc.doiche.util.tag
 import zinc.doiche.util.toData
 
 @CommandRegistry
@@ -18,6 +19,18 @@ class ItemDataCommand {
     @CommandFactory
     fun data() = CommandBuilder.literal("itemdata")
         .requiresOp()
+        .then(CommandBuilder.literal("debug")
+            .executesAsPlayer { _, player ->
+                player.inventory.itemInMainHand.let {
+                    if(it.isEmpty) {
+                        player.sendMessage(LoggerUtil.prefixed("손에 아이템을 들고 있어야 합니다", NamedTextColor.RED))
+                    } else {
+                        player.sendMessage(it.toString())
+                        player.sendMessage(it.tag.toString())
+                    }
+                }
+                CommandBuilder.SINGLE_SUCCESS
+            })
         .then(CommandBuilder.literal("get")
             .then(CommandBuilder.string("name")
                 .suggestArguments {
@@ -48,7 +61,12 @@ class ItemDataCommand {
                         ItemDataService.repository.findCachedByName(name)?.let {
                             player.sendMessage(LoggerUtil.prefixed("이미 존재하는 이름입니다: $name", NamedTextColor.RED))
                         } ?: run {
-                            val itemData = player.inventory.itemInMainHand.toData(name)
+                            val itemInMainHand = player.inventory.itemInMainHand
+                            if(itemInMainHand.isEmpty) {
+                                player.sendMessage(LoggerUtil.prefixed("손에 아이템을 들고 있어야 합니다", NamedTextColor.RED))
+                                return@run
+                            }
+                            val itemData = itemInMainHand.toData(name)
                             ItemDataService.repository.transaction {
                                 save(itemData)
                             }
@@ -78,7 +96,9 @@ class ItemDataCommand {
         ItemDataService.repository.findByName(name)?.let { itemData ->
             val item = itemData.getItem(amount)
             player.inventory.addItem(item)
-            player.sendMessage(LoggerUtil.prefixed(itemData.displayName()).append("${item.amount}개를 지급하였습니다."))
+            player.sendMessage(LoggerUtil.prefixed("'")
+                .append(itemData.displayName())
+                .append("' ${item.amount}개를 지급하였습니다."))
         } ?: {
             player.sendMessage(LoggerUtil.prefixed("아이템 데이터를 찾을 수 없습니다: $name", NamedTextColor.RED))
         }

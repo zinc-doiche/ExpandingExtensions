@@ -40,6 +40,9 @@ dependencies {
         exclude(group = "cglib", module = "cglib")
         exclude(group = "asm", module = "asm")
     }
+    implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
     implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
     implementation("org.ehcache:ehcache:3.10.0")
     implementation("com.zaxxer:HikariCP:5.1.0")
@@ -54,11 +57,9 @@ dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-core:2.16.2")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.2")
-
     // JUnit Jupiter API and Engine dependencies
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-
     // This dependency is used to enable more expressive tests
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
     testImplementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-test:2.15.0")
@@ -92,14 +93,6 @@ tasks {
         useJUnitPlatform()
     }
 }
-
-//sourceSets {
-//    main {
-//        resources {
-//            srcDirs("src/main/resources/META-INF")
-//        }
-//    }
-//}
 
 kapt {
     arguments {

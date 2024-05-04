@@ -12,7 +12,7 @@ import zinc.doiche.util.serialize
 import zinc.doiche.util.setTag
 
 @Entity
-@Table(name = "ITEM_DATA")
+@Table(name = "TBL_ITEM_DATA")
 class ItemData(
     @Column(unique = true, nullable = false)
     val name: String,
@@ -39,10 +39,13 @@ class ItemData(
 
     fun lore() = lore.map(miniMessage()::deserialize)
 
-    fun getItem(amount: Int = 1) = ItemStack(material, amount).apply {
-        lore(this@ItemData.lore())
-        editMeta { meta -> meta.displayName(this@ItemData.displayName()) }
-        setTag(TagParser.parseTag(tags.serialize()))
+    fun getItem(amount: Int = 1): ItemStack {
+        val item = ItemStack(material, amount).setTag(TagParser.parseTag(tags.serialize()))
+        item.editMeta { meta ->
+            meta.displayName(displayName())
+            meta.lore(lore())
+        }
+        return item
     }
 
     override fun equals(other: Any?): Boolean {
