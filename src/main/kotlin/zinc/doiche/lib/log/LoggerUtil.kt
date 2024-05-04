@@ -3,10 +3,10 @@ package zinc.doiche.lib.log
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import org.slf4j.Logger
 import zinc.doiche.Main.Companion.plugin
-import zinc.doiche.lib.annotation.Translatable
-import zinc.doiche.lib.annotation.TranslateRegistry
+import zinc.doiche.lib.TranslateRegistry
 import zinc.doiche.util.append
 
 @TranslateRegistry
@@ -28,6 +28,8 @@ object LoggerUtil {
     fun prefixed(component: Component) = prefix.append(component)
 
     fun prefixed(string: String) = prefix.append(string)
+
+    fun prefixed(string: String, color: TextColor) = prefix.append(string, color)
 
     fun prefixedInfo(msg: String) = plugin.componentLogger.info(prefixed(msg))
 

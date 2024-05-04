@@ -1,7 +1,7 @@
 package zinc.doiche.service.user.repository
 
 import org.bukkit.entity.Player
-import zinc.doiche.service.CachedKeyRepository
+import zinc.doiche.database.repository.CachedKeyRepository
 import zinc.doiche.service.user.`object`.QUser.user
 import zinc.doiche.service.user.`object`.User
 import java.util.*

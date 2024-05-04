@@ -8,7 +8,10 @@ import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.event.Listener
 import zinc.doiche.Main.Companion.plugin
-import zinc.doiche.lib.annotation.*
+import zinc.doiche.lib.CommandFactory
+import zinc.doiche.lib.CommandRegistry
+import zinc.doiche.lib.ListenerRegistry
+import zinc.doiche.lib.Priority
 import zinc.doiche.lib.log.LoggerUtil
 import zinc.doiche.service.Service
 import zinc.doiche.util.append
@@ -26,10 +29,14 @@ interface ProcessorFactory<T> {
 
         fun listener(): Processor<Nothing> = factory<Nothing>()
             .process { clazz, _ ->
-                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && clazz.isAssignableFrom(Listener::class.java)
-                ) {
+                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && clazz.isAssignableFrom(Listener::class.java)) {
                     val listener = clazz.getDeclaredConstructor().newInstance() as Listener
-                    plugin.register(listener)
+                    val listenerRegistry = clazz.getAnnotation(ListenerRegistry::class.java)
+                    if(listenerRegistry.async) {
+                        plugin.registerSuspending(listener)
+                    } else {
+                        plugin.register(listener)
+                    }
                 }
             }
             .create()

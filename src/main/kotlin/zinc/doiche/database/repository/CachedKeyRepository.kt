@@ -1,4 +1,4 @@
-package zinc.doiche.service
+package zinc.doiche.database.repository
 
 import redis.clients.jedis.JedisPooled
 import zinc.doiche.Main

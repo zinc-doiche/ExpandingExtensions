@@ -1,11 +1,12 @@
 package zinc.doiche
 
+import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.event.Listener
-import org.bukkit.plugin.java.JavaPlugin
 import redis.clients.jedis.JedisPooled
 import zinc.doiche.database.CachePoolFactory
 import zinc.doiche.database.DatabaseFactoryProvider
@@ -16,7 +17,7 @@ import zinc.doiche.lib.log.LoggerUtil
 import zinc.doiche.util.append
 import java.io.File
 
-class Main: JavaPlugin() {
+class Main: SuspendingJavaPlugin() {
     internal companion object {
         lateinit var plugin: Main
             private set
@@ -35,7 +36,7 @@ class Main: JavaPlugin() {
 
     private val services: MutableList<Service> = mutableListOf()
 
-    override fun onLoad() {
+    override suspend fun onLoadAsync() {
         LoggerUtil.init(slF4JLogger)
         initPluginInst(this)
         DatabaseFactoryProvider.create()
@@ -44,11 +45,11 @@ class Main: JavaPlugin() {
         loadServices()
     }
 
-    override fun onEnable() {
+    override suspend fun onEnableAsync() {
         services.forEach(Service::onEnable)
     }
 
-    override fun onDisable() {
+    override suspend fun onDisableAsync() {
         services.forEach(Service::onDisable)
         jedisPooled.close()
         DatabaseFactoryProvider.close()
@@ -65,6 +66,10 @@ class Main: JavaPlugin() {
 
     fun register(listener: Listener) {
         server.pluginManager.registerEvents(listener, this)
+    }
+
+    fun registerSuspending(listener: Listener) {
+        server.pluginManager.registerSuspendingEvents(listener, this)
     }
 
     fun register(service: Service) {

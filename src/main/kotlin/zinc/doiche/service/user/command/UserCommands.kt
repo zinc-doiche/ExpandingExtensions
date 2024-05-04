@@ -3,8 +3,8 @@ package zinc.doiche.service.user.command
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
-import zinc.doiche.lib.annotation.CommandFactory
-import zinc.doiche.lib.annotation.CommandRegistry
+import zinc.doiche.lib.CommandFactory
+import zinc.doiche.lib.CommandRegistry
 import zinc.doiche.lib.brigadier.CommandBuilder
 
 @CommandRegistry

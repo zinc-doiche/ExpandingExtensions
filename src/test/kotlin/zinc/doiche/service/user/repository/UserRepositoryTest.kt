@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import zinc.doiche.service.Repository
+import zinc.doiche.database.repository.Repository
 import zinc.doiche.service.RepositoryTest
 import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.User

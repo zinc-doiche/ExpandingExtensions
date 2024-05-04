@@ -27,6 +27,8 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.15.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.15.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation(kotlin("reflect"))
     implementation("org.reflections:reflections:0.9.12")
@@ -64,6 +66,7 @@ dependencies {
 
     // This dependency is used to enable more expressive tests
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+    testImplementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-test:2.15.0")
 }
 
 //의존성 탐색하도록 설정(duplicatesStrategy 설정시 필요)

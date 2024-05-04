@@ -1,4 +1,4 @@
-package zinc.doiche.lib.annotation
+package zinc.doiche.lib
 
 // ===== Message injections
 
@@ -34,7 +34,7 @@ annotation class Read(val path: String)
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class ListenerRegistry
+annotation class ListenerRegistry(val async: Boolean = false)
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)

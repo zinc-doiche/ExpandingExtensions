@@ -1,4 +1,4 @@
-package zinc.doiche.service
+package zinc.doiche.database.repository
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
@@ -19,9 +19,9 @@ abstract class Repository<E> {
         }
     }
 
-    fun transaction(block: (EntityManager) -> Unit) {
+    fun transaction(block: Repository<E>.(EntityManager) -> Unit) {
         entityManager.transaction {
-            block(entityManager)
+            block(this, entityManager)
         }
     }
 

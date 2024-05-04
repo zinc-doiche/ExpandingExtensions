@@ -6,11 +6,10 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import zinc.doiche.lib.annotation.ListenerRegistry
+import zinc.doiche.lib.ListenerRegistry
 import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.User
 import zinc.doiche.service.user.user
-import zinc.doiche.util.transaction
 
 @ListenerRegistry
 class UserIOListener: Listener {
@@ -26,7 +25,7 @@ class UserIOListener: Listener {
                 period.update()
             } ?: User(uuid).apply {
                 transaction {
-                    save(this)
+                    save(this@apply)
                 }
             }
             saveId(uuid, user.id!!)
