@@ -2,7 +2,6 @@ package zinc.doiche.util
 
 import jakarta.persistence.EntityManager
 import jakarta.persistence.EntityTransaction
-import zinc.doiche.lib.log.LoggerUtil
 
 internal inline fun EntityManager.transaction(crossinline block: (EntityTransaction) -> Unit) = transaction.run {
     runCatching {

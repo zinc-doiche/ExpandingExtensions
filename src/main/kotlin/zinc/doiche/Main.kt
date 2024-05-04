@@ -13,9 +13,8 @@ import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.lib.init.ClassLoader
 import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.service.Service
-import zinc.doiche.lib.log.LoggerUtil
+import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.append
-import zinc.doiche.util.gson
 import java.io.File
 
 class Main: SuspendingJavaPlugin() {
@@ -50,17 +49,13 @@ class Main: SuspendingJavaPlugin() {
 
     override suspend fun onEnableAsync() {
         services.forEach(Service::onEnable)
+        processListeners()
     }
 
     override suspend fun onDisableAsync() {
-        services.forEach { service ->
-            LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
-                .append("Unloading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
-            service.onDisable()
-        }
+        unloadServices()
         jedisPooled.close()
         DatabaseFactoryProvider.close()
-        entityManager.close()
     }
 
     fun config(name: String): File = File(dataFolder, name).apply {
@@ -87,6 +82,11 @@ class Main: SuspendingJavaPlugin() {
 //            .add(ProcessorFactory.translatable())
             .add(ProcessorFactory.service())
             .add(ProcessorFactory.command())
+            .process()
+    }
+
+    private fun processListeners() {
+        ClassLoader()
             .add(ProcessorFactory.listener())
             .process()
     }
@@ -102,8 +102,16 @@ class Main: SuspendingJavaPlugin() {
     private fun loadServices() {
         for (service in services) {
             LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
-                .append("Loading").append(service::class.simpleName!!, NamedTextColor.YELLOW))
+                .append("Loading ").append(service::class.simpleName!!, NamedTextColor.YELLOW))
             service.onLoad()
+        }
+    }
+
+    private fun unloadServices() {
+        for (service in services) {
+            LoggerUtil.prefixedInfo(text("[").append("Service", NamedTextColor.DARK_AQUA).append("] ")
+                .append("Unloading ").append(service::class.simpleName!!, NamedTextColor.YELLOW))
+            service.onDisable()
         }
     }
 }

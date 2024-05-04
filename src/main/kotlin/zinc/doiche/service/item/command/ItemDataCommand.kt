@@ -8,7 +8,7 @@ import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.CommandFactory
 import zinc.doiche.lib.CommandRegistry
 import zinc.doiche.lib.brigadier.CommandBuilder
-import zinc.doiche.lib.log.LoggerUtil
+import zinc.doiche.util.LoggerUtil
 import zinc.doiche.service.item.ItemDataService
 import zinc.doiche.util.append
 import zinc.doiche.util.toData
@@ -87,7 +87,8 @@ class ItemDataCommand {
     private fun list(player: Player, page: Int = 1) {
         val pageable = ItemDataService.repository.findByPage(page, 10)
         val list = pageable.content.map { text(" - $it") }
-        player.sendMessage(LoggerUtil.prefixed("아이템 데이터 목록: ${pageable.page}/${pageable.maxPage}")
+        player.sendMessage(
+            LoggerUtil.prefixed("아이템 데이터 목록: ${pageable.page}/${pageable.maxPage}")
             .append(" | ", NamedTextColor.AQUA)
             .append("전체 ${pageable.total}개", NamedTextColor.GRAY)
             .apply {

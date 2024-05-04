@@ -1,13 +1,9 @@
 package zinc.doiche.database
 
-import com.github.shynixn.mccoroutine.bukkit.launch
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityManagerFactory
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.hibernate.boot.MetadataSources
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.hibernate.cfg.Configuration
 import org.hibernate.service.ServiceRegistry
@@ -25,7 +21,11 @@ object DatabaseFactoryProvider {
     fun get() = entityManagerFactory
 
     fun close() {
-        entityManagerFactory?.close()
+        entityManagerFactory?.let {
+            if(it.isOpen) {
+                it.close()
+            }
+        }
     }
 
     fun create() {
@@ -62,7 +62,7 @@ object DatabaseFactoryProvider {
         val properties = mapOf(
             "jakarta.persistence.nonJtaDataSource" to dataSource,
             "hibernate.show_sql" to hibernateConfig.showSQL,
-            "hibernate.dialect" to "org.hibernate.dialect.PostgreSQLDialect",
+//            "hibernate.dialect" to "org.hibernate.dialect.PostgreSQLDialect",
             "hibernate.hbm2ddl.auto" to hibernateConfig.hbm2ddl,
             "hibernate.cache.use_second_level_cache" to true,
             "hibernate.globally_quoted_identifiers" to true,
@@ -80,11 +80,8 @@ object DatabaseFactoryProvider {
             val serviceRegistry: ServiceRegistry = StandardServiceRegistryBuilder()
                 .applySettings(this.properties)
                 .build()
-            val metaDataSource = MetadataSources(serviceRegistry)
-            metaDataSource
             buildSessionFactory(serviceRegistry)
         }
-//        this.entityManagerFactory = Persistence.createEntityManagerFactory("database", properties)
         return entityManagerFactory!!
     }
 

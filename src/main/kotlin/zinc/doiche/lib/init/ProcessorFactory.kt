@@ -12,7 +12,7 @@ import zinc.doiche.lib.CommandFactory
 import zinc.doiche.lib.CommandRegistry
 import zinc.doiche.lib.ListenerRegistry
 import zinc.doiche.lib.Priority
-import zinc.doiche.lib.log.LoggerUtil
+import zinc.doiche.util.LoggerUtil
 import zinc.doiche.service.Service
 import zinc.doiche.util.append
 
@@ -29,7 +29,7 @@ interface ProcessorFactory<T> {
 
         fun listener(): Processor<Nothing> = factory<Nothing>()
             .process { clazz, _ ->
-                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && clazz.isAssignableFrom(Listener::class.java)) {
+                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && Listener::class.java.isAssignableFrom(clazz)) {
                     val listener = clazz.getDeclaredConstructor().newInstance() as Listener
                     val listenerRegistry = clazz.getAnnotation(ListenerRegistry::class.java)
                     if(listenerRegistry.async) {
@@ -74,8 +74,7 @@ interface ProcessorFactory<T> {
                 Multimaps.newListMultimap(mutableMapOf(), ::mutableListOf)
             }
             .process { clazz, preObject ->
-                if(clazz != Service::class.java && clazz.isAssignableFrom(Service::class.java)) {
-                    LoggerUtil.prefixedInfo("class: ${clazz.simpleName}, Service")
+                if(clazz != Service::class.java && Service::class.java.isAssignableFrom(clazz)) {
                     val service = clazz.getDeclaredConstructor().newInstance() as Service
                     val priority = if(clazz.isAnnotationPresent(Priority::class.java))
                         clazz.getAnnotation(Priority::class.java).value

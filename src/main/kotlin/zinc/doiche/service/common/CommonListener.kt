@@ -6,7 +6,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.server.ServerLoadEvent
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.ListenerRegistry
-import zinc.doiche.lib.log.LoggerUtil.prefixed
+import zinc.doiche.util.LoggerUtil.prefixed
 import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.QUser.user
 

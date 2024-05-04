@@ -1,4 +1,4 @@
-package zinc.doiche.lib.log
+package zinc.doiche.util
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.TextColor
 import org.slf4j.Logger
 import zinc.doiche.Main.Companion.plugin
 import zinc.doiche.lib.TranslateRegistry
-import zinc.doiche.util.append
 
 @TranslateRegistry
 object LoggerUtil {
@@ -22,7 +21,7 @@ object LoggerUtil {
         if(this::logger.isInitialized) {
             throw IllegalStateException("LoggerUtil is already initialized.")
         }
-        this.logger = logger
+        LoggerUtil.logger = logger
     }
 
     fun prefixed(component: Component) = prefix.append(component)
