@@ -17,9 +17,9 @@ import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.append
 import java.io.File
 
-class Main: SuspendingJavaPlugin() {
+abstract class ExpandingExtensions: SuspendingJavaPlugin() {
     internal companion object {
-        lateinit var plugin: Main
+        lateinit var plugin: ExpandingExtensions
             private set
     }
 
@@ -91,8 +91,8 @@ class Main: SuspendingJavaPlugin() {
             .process()
     }
 
-    private fun initPluginInst(plugin: Main) {
-        Main.plugin = plugin
+    private fun initPluginInst(plugin: ExpandingExtensions) {
+        ExpandingExtensions.plugin = plugin
     }
 
     private fun initJedisPooled() {
