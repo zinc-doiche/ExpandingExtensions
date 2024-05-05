@@ -5,7 +5,7 @@ import kotlinx.coroutines.async
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.CommandFactory
 import zinc.doiche.lib.CommandRegistry
 import zinc.doiche.lib.brigadier.CommandBuilder

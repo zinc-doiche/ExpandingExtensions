@@ -11,10 +11,10 @@ import zinc.doiche.service.user.UserService
 import zinc.doiche.service.user.`object`.User
 import zinc.doiche.service.user.user
 
-@ListenerRegistry
+@ListenerRegistry(async = true)
 class UserIOListener: Listener {
     @EventHandler
-    fun onPreLogin(event: AsyncPlayerPreLoginEvent) {
+    suspend fun onPreLogin(event: AsyncPlayerPreLoginEvent) {
         val uuid = event.uniqueId
 
         if(event.loginResult != AsyncPlayerPreLoginEvent.Result.ALLOWED) {
@@ -36,7 +36,9 @@ class UserIOListener: Listener {
     }
 
     @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {}
+    suspend fun onJoin(event: PlayerJoinEvent) {
+
+    }
 
 //    @EventHandler
 //    fun onJump(event: PlayerJumpEvent) {
@@ -48,7 +50,7 @@ class UserIOListener: Listener {
 //    }
 
     @EventHandler
-    fun onQuit(event: PlayerQuitEvent) {
+    suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         val user = player.user ?: return
         UserService.repository.run {

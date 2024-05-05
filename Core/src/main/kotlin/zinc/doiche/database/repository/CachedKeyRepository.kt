@@ -1,7 +1,7 @@
 package zinc.doiche.database.repository
 
 import redis.clients.jedis.JedisPooled
-import zinc.doiche.Main
+import zinc.doiche.ExpandingExtensions
 import zinc.doiche.database.CachePoolFactory
 
 abstract class CachedKeyRepository<I, E>: Repository<E>() {
@@ -9,7 +9,7 @@ abstract class CachedKeyRepository<I, E>: Repository<E>() {
 
     protected val jedisPooled: JedisPooled by lazy {
         try {
-            Main.plugin.jedisPooled
+            ExpandingExtensions.plugin.jedisPooled
         } catch (e: Exception) {
             CachePoolFactory().create() ?: throw IllegalStateException("jedis pooled is null")
         }

@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.slf4j.Logger
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.TranslateRegistry
 
 @TranslateRegistry
@@ -16,6 +16,9 @@ object LoggerUtil {
 
     lateinit var logger: Logger
         private set
+
+    val isInit: Boolean
+        get() = this::logger.isInitialized
 
     fun init(logger: Logger) {
         if(this::logger.isInitialized) {

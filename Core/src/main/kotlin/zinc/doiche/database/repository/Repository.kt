@@ -2,7 +2,7 @@ package zinc.doiche.database.repository
 
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
-import zinc.doiche.Main
+import zinc.doiche.ExpandingExtensions
 import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.util.transaction
 
@@ -13,7 +13,7 @@ abstract class Repository<E> {
 
     protected val entityManager: EntityManager by lazy {
         try {
-            Main.plugin.entityManager
+            ExpandingExtensions.plugin.entityManager
         } catch (e: Exception) {
             DatabaseFactoryProvider.get()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
         }
@@ -21,7 +21,7 @@ abstract class Repository<E> {
 
     protected val query: JPAQueryFactory by lazy {
         try {
-            Main.plugin.query
+            ExpandingExtensions.plugin.query
         } catch (e: Exception) {
             JPAQueryFactory(entityManager)
         }

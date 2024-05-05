@@ -1,4 +1,3 @@
-import io.papermc.paperweight.tasks.RemapJar
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
@@ -13,7 +12,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "1.5.12" apply false
 }
 
-subprojects {
+allprojects {
     apply {
         plugin("kotlin")
         plugin("org.jetbrains.kotlin.jvm")
@@ -40,11 +39,6 @@ subprojects {
         annotation("jakarta.persistence.Entity")
         annotation("jakarta.persistence.Embeddable")
         annotation("jakarta.persistence.MappedSuperclass")
-    }
-
-    //의존성 탐색하도록 설정(duplicatesStrategy 설정시 필요)
-    configurations.named("implementation") {
-        isCanBeResolved = true
     }
 
     dependencies {
@@ -95,13 +89,6 @@ subprojects {
     }
 
     tasks {
-        withType<Jar> {
-            val path = configurations.named("implementation") {
-                map { if (it.isDirectory) it else zipTree(it) }
-            }
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-            from(path)
-        }
         withType<JavaCompile> {
             options.encoding = "UTF-8"
         }
@@ -115,14 +102,5 @@ subprojects {
         val assemble by getting {
             dependsOn("reobfJar")
         }
-        withType<RemapJar> {
-            outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-${project.version}.jar"))
-        }
     }
-
-//    kapt {
-//        arguments {
-//            arg("querydsl.jpa", true)
-//        }
-//    }
 }

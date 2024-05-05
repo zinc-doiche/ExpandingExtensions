@@ -4,7 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.ServerLoadEvent
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.ListenerRegistry
 import zinc.doiche.util.LoggerUtil.prefixed
 import zinc.doiche.service.user.UserService

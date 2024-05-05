@@ -4,7 +4,7 @@ import redis.clients.jedis.ConnectionPoolConfig
 import redis.clients.jedis.DefaultJedisClientConfig
 import redis.clients.jedis.HostAndPort
 import redis.clients.jedis.JedisPooled
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.util.toObject
 import java.time.Duration
 
@@ -12,6 +12,9 @@ class CachePoolFactory {
     companion object {
         private const val REDIS_CONFIG_PATH = "database/redis.json"
         private var config: CacheConfig? = null
+
+        val isInit: Boolean
+            get() = config != null
 
         fun initConfig(config: CacheConfig) {
             if(this.config == null) {

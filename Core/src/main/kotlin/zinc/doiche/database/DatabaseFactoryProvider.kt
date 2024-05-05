@@ -8,7 +8,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder
 import org.hibernate.cfg.Configuration
 import org.hibernate.service.ServiceRegistry
 import org.reflections.Reflections
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.util.toObject
 
 object DatabaseFactoryProvider {
@@ -17,6 +17,9 @@ object DatabaseFactoryProvider {
     private const val HIBERNATE_CONFIG_PATH = "database/hibernate.json"
 
     private var entityManagerFactory: EntityManagerFactory? = null
+
+    val isInit: Boolean
+        get() = entityManagerFactory != null
 
     fun get() = entityManagerFactory
 
@@ -43,6 +46,10 @@ object DatabaseFactoryProvider {
         hikariConfiguration: HikariConfiguration,
         hibernateConfig: HibernateConfig
     ): EntityManagerFactory {
+        if(isInit) {
+            throw IllegalStateException("EntityManagerFactory is already initialized.")
+        }
+
 //        Thread.currentThread().contextClassLoader = javaClass.classLoader
         val hikariConfig = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"

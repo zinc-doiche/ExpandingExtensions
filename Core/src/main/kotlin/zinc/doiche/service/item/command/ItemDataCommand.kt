@@ -4,7 +4,7 @@ import com.github.shynixn.mccoroutine.bukkit.launch
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
-import zinc.doiche.Main.Companion.plugin
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.CommandFactory
 import zinc.doiche.lib.CommandRegistry
 import zinc.doiche.lib.brigadier.CommandBuilder

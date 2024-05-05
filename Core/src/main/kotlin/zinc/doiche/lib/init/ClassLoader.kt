@@ -1,7 +1,6 @@
 package zinc.doiche.lib.init
 
-import zinc.doiche.Main.Companion.plugin
-import zinc.doiche.util.LoggerUtil
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import java.io.File
 import java.nio.file.Paths
 import java.util.jar.JarFile

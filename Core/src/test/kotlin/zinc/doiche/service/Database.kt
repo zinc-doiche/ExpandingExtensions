@@ -6,9 +6,15 @@ import zinc.doiche.database.DatabaseFactoryProvider
 import zinc.doiche.util.LoggerUtil
 
 internal fun init(logger: Logger) {
-    LoggerUtil.init(logger)
-    DatabaseFactoryProvider.initEntityManagerFactory(
-        connectionConfig, hikariConfiguration, hibernateConfig
-    )
-    CachePoolFactory.initConfig(cacheConfig)
+    if(!LoggerUtil.isInit) {
+        LoggerUtil.init(logger)
+    }
+    if (!DatabaseFactoryProvider.isInit) {
+        DatabaseFactoryProvider.initEntityManagerFactory(
+            connectionConfig, hikariConfiguration, hibernateConfig
+        )
+    }
+    if(!CachePoolFactory.isInit) {
+        CachePoolFactory.initConfig(cacheConfig)
+    }
 }
