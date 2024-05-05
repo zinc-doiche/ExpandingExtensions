@@ -12,7 +12,7 @@ plugins {
     id("io.papermc.paperweight.userdev") version "1.5.12" apply false
 }
 
-allprojects {
+subprojects {
     apply {
         plugin("kotlin")
         plugin("org.jetbrains.kotlin.jvm")
@@ -41,6 +41,12 @@ allprojects {
         annotation("jakarta.persistence.MappedSuperclass")
     }
 
+    configurations {
+        named("implementation") {
+            isCanBeResolved = true
+        }
+    }
+
     dependencies {
         val implementation by configurations
         val compileOnly by configurations
@@ -48,6 +54,10 @@ allprojects {
         val testRuntimeOnly by configurations
         val kapt by configurations
         val paperweight = extensions.getByType(PaperweightUserDependenciesExtension::class)
+
+        if(project.name != "Core") {
+            implementation(project(":Core", "runtimeElements"))
+        }
 
         paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
         implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.15.0")
@@ -92,15 +102,27 @@ allprojects {
         withType<JavaCompile> {
             options.encoding = "UTF-8"
         }
-
         withType<Javadoc> {
             options.encoding = "UTF-8"
+        }
+        withType<ProcessResources> {
+            filteringCharset = "UTF-8" // We want UTF-8 for everything
+            val properties = mapOf(
+                "name" to project.name,
+                "version" to project.version,
+                "description" to project.description,
+                "apiVersion" to "1.20"
+            )
+            inputs.properties(properties)
+            filesMatching("plugin.yml") {
+                expand(properties)
+            }
         }
         withType<Test> {
             useJUnitPlatform()
         }
-        val assemble by getting {
-            dependsOn("reobfJar")
+        withType<Assemble> {
+            dependsOn(named("reobfJar"))
         }
     }
 }

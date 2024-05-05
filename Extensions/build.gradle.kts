@@ -1,28 +1,16 @@
 
-configurations.implementation {
-    isCanBeResolved = true
-}
-
-dependencies {
-    implementation(project(":Core"))
-}
-
-//configurations {
-//    implementation {
-//        isCanBeResolved = true
-//    }
-//}
-
-tasks{
-    withType<Jar> {
-        dependsOn(":Core:build")
-        val path = configurations.named("implementation") {
-            map { if (it.isDirectory) it else zipTree(it) }
-        }
+tasks {
+    jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from(path)
+        from(configurations.runtimeClasspath.get().map {
+            if (it.isDirectory) it else zipTree(it)
+        })
+        dependsOn( project(":Core").tasks.named("jar"))
     }
+
     reobfJar {
-        outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-${project.version}.jar"))
+        dependsOn(jar)
+//        inputJar.set(jar.get().archiveFile)
+        outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-$version.jar"))
     }
 }
