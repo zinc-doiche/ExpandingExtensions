@@ -32,6 +32,18 @@ class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
         return itemData
     }
 
+    private fun saveMany(amount: Int) {
+        repository.transaction {
+            repeat(amount) { i ->
+                save(ItemData(
+                    "test $i",
+                    Material.PAPER,
+                    "<!i><rainbow>test $i",
+                ))
+            }
+        }
+    }
+
     @Test
     fun save() {
         val itemData = saveOne("save")
@@ -64,6 +76,13 @@ class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
         logger.info("findOne: $findOne")
         logger.info("itemData: $itemData")
         assert(itemData == findOne)
+    }
+
+    @Test
+    fun findByPage() {
+        saveMany(100)
+        val page = repository.findByPage(1, 10)
+        logger.info("page: $page")
     }
 
     @Test

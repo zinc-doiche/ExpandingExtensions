@@ -5,11 +5,13 @@
     <option name="description" value="" />
   </component>
   <component name="EntryPointsManager">
-    <list size="4">
-      <item index="0" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandFactory" />
-      <item index="1" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandFactory" />
+    <list size="6">
+      <item index="0" class="java.lang.String" itemvalue="zinc.doiche.lib.CommandRegistry" />
+      <item index="1" class="java.lang.String" itemvalue="zinc.doiche.lib.ListenerRegistry" />
       <item index="2" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandFactory" />
-      <item index="3" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandRegistry" />
+      <item index="3" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandFactory" />
+      <item index="4" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandFactory" />
+      <item index="5" class="java.lang.String" itemvalue="zinc.doiche.lib.annotation.CommandRegistry" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

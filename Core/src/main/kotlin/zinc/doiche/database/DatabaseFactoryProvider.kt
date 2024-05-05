@@ -44,7 +44,6 @@ object DatabaseFactoryProvider {
         hibernateConfig: HibernateConfig
     ): EntityManagerFactory {
 //        Thread.currentThread().contextClassLoader = javaClass.classLoader
-
         val hikariConfig = HikariConfig().apply {
             driverClassName = "org.postgresql.Driver"
             jdbcUrl = connectionConfig.getURL()
