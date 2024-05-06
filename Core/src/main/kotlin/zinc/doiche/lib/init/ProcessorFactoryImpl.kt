@@ -1,8 +1,10 @@
 package zinc.doiche.lib.init
 
+import org.reflections.Reflections
+
 class ProcessorFactoryImpl<T> internal constructor(): ProcessorFactory<T> {
     private var preProcess: () -> T? = { null }
-    private var processor: (Class<*>, T?) -> Unit = { _, _ -> }
+    private var processor: (Reflections, T?) -> Unit = { _, _ -> }
     private var postProcess: (T?) -> Unit = {}
 
     override fun preProcess(preProcess: () -> T?): ProcessorFactory<T> {
@@ -10,8 +12,8 @@ class ProcessorFactoryImpl<T> internal constructor(): ProcessorFactory<T> {
         return this
     }
 
-    override fun process(processor: (Class<*>, T?) -> Unit): ProcessorFactory<T> {
-        this.processor = { clazz, preObject -> processor.invoke(clazz, preObject) }
+    override fun process(processor: (Reflections, T?) -> Unit): ProcessorFactory<T> {
+        this.processor = { reflections, preObject -> processor.invoke(reflections, preObject) }
         return this
     }
 
