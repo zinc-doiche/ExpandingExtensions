@@ -1,6 +1,7 @@
 package zinc.doiche.lib.init
 
 import zinc.doiche.ExpandingExtensions.Companion.plugin
+import zinc.doiche.util.LoggerUtil
 import java.io.File
 import java.nio.file.Paths
 import java.util.jar.JarFile
@@ -26,6 +27,9 @@ class ClassLoader {
             objectList.add(preObject)
         }
         getAllPath("zinc.doiche").forEach { path ->
+
+            LoggerUtil.prefixedInfo(path)
+
             processors.forEachIndexed { index, processor ->
                 val preObject = objectList[index]
                 processor.process(path, preObject)

@@ -1,18 +1,15 @@
 package zinc.doiche
 
-import zinc.doiche.util.LoggerUtil
-
 class Main: ExpandingExtensions() {
     override suspend fun onLoadAsync() {
-        super.onLoadAsync()
+        preLoad()
     }
 
     override suspend fun onEnableAsync() {
-        LoggerUtil.prefixedInfo("Version: Extension")
-        super.onEnableAsync()
+        preEnable()
     }
 
     override suspend fun onDisableAsync() {
-        super.onDisableAsync()
+        postDisable()
     }
 }

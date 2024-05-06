@@ -1,6 +1,7 @@
 package zinc.doiche
 
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
+import com.github.shynixn.mccoroutine.bukkit.SuspendingPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
@@ -18,7 +19,7 @@ import zinc.doiche.util.append
 import java.io.File
 
 abstract class ExpandingExtensions: SuspendingJavaPlugin() {
-    internal companion object {
+    companion object {
         lateinit var plugin: ExpandingExtensions
             private set
     }
@@ -38,7 +39,7 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin() {
 
     private val services: MutableList<Service> = mutableListOf()
 
-    override suspend fun onLoadAsync() {
+    final suspend fun preLoad() {
         initPluginInst(this)
         LoggerUtil.init(slF4JLogger)
         DatabaseFactoryProvider.create()
@@ -47,32 +48,32 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin() {
         loadServices()
     }
 
-    override suspend fun onEnableAsync() {
+    final suspend fun preEnable() {
         services.forEach(Service::onEnable)
         processListeners()
     }
 
-    override suspend fun onDisableAsync() {
+    final suspend fun postDisable() {
         unloadServices()
         jedisPooled.close()
         DatabaseFactoryProvider.close()
     }
 
-    fun config(name: String): File = File(dataFolder, name).apply {
+    final fun config(name: String): File = File(dataFolder, name).apply {
         if (!exists()) {
             saveResource(name, false)
         }
     }
 
-    fun register(listener: Listener) {
+    final fun register(listener: Listener) {
         server.pluginManager.registerEvents(listener, this)
     }
 
-    fun registerSuspending(listener: Listener) {
+    final fun registerSuspending(listener: Listener) {
         server.pluginManager.registerSuspendingEvents(listener, this)
     }
 
-    fun register(service: Service) {
+    final fun register(service: Service) {
         services.add(service)
     }
 
