@@ -18,7 +18,7 @@ import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.append
 import java.io.File
 
-abstract class ExpandingExtensions: SuspendingJavaPlugin() {
+open class ExpandingExtensions: SuspendingJavaPlugin() {
     companion object {
         lateinit var plugin: ExpandingExtensions
             private set
@@ -39,7 +39,7 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin() {
 
     private val services: MutableList<Service> = mutableListOf()
 
-    final suspend fun preLoad() {
+    override suspend fun onLoadAsync() {
         initPluginInst(this)
         LoggerUtil.init(slF4JLogger)
         DatabaseFactoryProvider.create()
@@ -48,32 +48,32 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin() {
         loadServices()
     }
 
-    final suspend fun preEnable() {
+    override suspend fun onEnableAsync() {
         services.forEach(Service::onEnable)
         processListeners()
     }
 
-    final suspend fun postDisable() {
+    override suspend fun onDisableAsync() {
         unloadServices()
         jedisPooled.close()
         DatabaseFactoryProvider.close()
     }
 
-    final fun config(name: String): File = File(dataFolder, name).apply {
+    fun config(name: String): File = File(dataFolder, name).apply {
         if (!exists()) {
             saveResource(name, false)
         }
     }
 
-    final fun register(listener: Listener) {
+    fun register(listener: Listener) {
         server.pluginManager.registerEvents(listener, this)
     }
 
-    final fun registerSuspending(listener: Listener) {
+    fun registerSuspending(listener: Listener) {
         server.pluginManager.registerSuspendingEvents(listener, this)
     }
 
-    final fun register(service: Service) {
+    fun register(service: Service) {
         services.add(service)
     }
 

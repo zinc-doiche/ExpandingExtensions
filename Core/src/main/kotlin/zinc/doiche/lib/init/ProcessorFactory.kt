@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.event.Listener
+import org.reflections.Reflections
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.CommandFactory
 import zinc.doiche.lib.CommandRegistry
@@ -18,7 +19,7 @@ import zinc.doiche.util.append
 
 interface ProcessorFactory<T> {
     fun preProcess(preProcess: () -> T?): ProcessorFactory<T>
-    fun process(processor: (Class<*>, T?) -> Unit): ProcessorFactory<T>
+    fun process(processor: (Reflections, T?) -> Unit): ProcessorFactory<T>
     fun postProcess(postProcess: (T?) -> Unit): ProcessorFactory<T>
     fun create(): Processor<T>
 
@@ -28,35 +29,36 @@ interface ProcessorFactory<T> {
         }
 
         fun listener(): Processor<Nothing> = factory<Nothing>()
-            .process { clazz, _ ->
-                if(clazz.isAnnotationPresent(ListenerRegistry::class.java) && Listener::class.java.isAssignableFrom(clazz)) {
-                    val listener = clazz.getDeclaredConstructor().newInstance() as Listener
-                    val listenerRegistry = clazz.getAnnotation(ListenerRegistry::class.java)
-                    if(listenerRegistry.async) {
-                        plugin.registerSuspending(listener)
-                    } else {
-                        plugin.register(listener)
+            .process { reflections, _ ->
+                reflections.getTypesAnnotatedWith(ListenerRegistry::class.java).forEach { clazz ->
+                    if(Listener::class.java.isAssignableFrom(clazz)) {
+                        val listener = clazz.getDeclaredConstructor().newInstance() as Listener
+                        val listenerRegistry = clazz.getAnnotation(ListenerRegistry::class.java)
+                        if(listenerRegistry.async) {
+                            plugin.registerSuspending(listener)
+                        } else {
+                            plugin.register(listener)
+                        }
                     }
                 }
             }
             .create()
 
         fun command(): Processor<Nothing> = factory<Nothing>()
-            .process { clazz, _ ->
-                if(!clazz.isAnnotationPresent(CommandRegistry::class.java)) {
-                    return@process
-                }
-                val commandRegistry = clazz.getDeclaredConstructor().newInstance()
-                val commandMap = Bukkit.getCommandMap()
-                for (method in clazz.declaredMethods) {
-                    if(method.isAnnotationPresent(CommandFactory::class.java)) {
-                        val factory = method.getAnnotation(CommandFactory::class.java)
-                        val aliases = factory.aliases
-                        val command = method.invoke(commandRegistry) as Command
+            .process { reflections, _ ->
+                reflections.getTypesAnnotatedWith(CommandRegistry::class.java).forEach { clazz ->
+                    val commandRegistry = clazz.getDeclaredConstructor().newInstance()
+                    val commandMap = Bukkit.getCommandMap()
+                    for (method in clazz.declaredMethods) {
+                        if(method.isAnnotationPresent(CommandFactory::class.java)) {
+                            val factory = method.getAnnotation(CommandFactory::class.java)
+                            val aliases = factory.aliases
+                            val command = method.invoke(commandRegistry) as Command
 
-                        command.aliases = aliases.toMutableList()
-                        logCommand(command)
-                        commandMap.register(plugin.name, command)
+                            command.aliases = aliases.toMutableList()
+                            logCommand(command)
+                            commandMap.register(plugin.name, command)
+                        }
                     }
                 }
             }
@@ -72,8 +74,8 @@ interface ProcessorFactory<T> {
             .preProcess {
                 Multimaps.newListMultimap(mutableMapOf(), ::mutableListOf)
             }
-            .process { clazz, preObject ->
-                if(clazz != Service::class.java && Service::class.java.isAssignableFrom(clazz)) {
+            .process { reflections, preObject ->
+                reflections.getSubTypesOf(Service::class.java).forEach { clazz ->
                     val service = clazz.getDeclaredConstructor().newInstance() as Service
                     val priority = if(clazz.isAnnotationPresent(Priority::class.java))
                         clazz.getAnnotation(Priority::class.java).value

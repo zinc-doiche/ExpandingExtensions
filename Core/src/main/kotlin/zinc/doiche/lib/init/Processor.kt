@@ -1,17 +1,14 @@
 package zinc.doiche.lib.init
 
+import org.reflections.Reflections
+
 class Processor<T>(
     val preProcess: () -> T?,
-    private val process: (Class<*>, T?) -> Unit,
+    private val process: (Reflections, T?) -> Unit,
     private val postProcess: (T?) -> Unit
 ) {
-    fun process(path: String, preObject: Any?) {
-        try {
-            val clazz = Class.forName(path.substring(0, path.lastIndexOf('.')))
-            process.invoke(clazz, preObject(preObject))
-        } catch (e: ClassNotFoundException) {
-            throw RuntimeException(e);
-        }
+    fun process(reflections: Reflections, preObject: Any?) {
+        process.invoke(reflections, preObject(preObject))
     }
 
     @Suppress("UNCHECKED_CAST")

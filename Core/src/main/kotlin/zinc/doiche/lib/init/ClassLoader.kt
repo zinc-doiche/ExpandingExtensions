@@ -1,5 +1,7 @@
 package zinc.doiche.lib.init
 
+import joptsimple.internal.Reflection
+import org.reflections.Reflections
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.util.LoggerUtil
 import java.io.File
@@ -26,15 +28,19 @@ class ClassLoader {
             val preObject = it.preProcess()
             objectList.add(preObject)
         }
-        getAllPath("zinc.doiche").forEach { path ->
 
-            LoggerUtil.prefixedInfo(path)
+        val reflections = Reflections("zinc.doiche")
 
-            processors.forEachIndexed { index, processor ->
-                val preObject = objectList[index]
-                processor.process(path, preObject)
-            }
+        processors.forEachIndexed { index, processor ->
+            val preObject = objectList[index]
+            processor.process(reflections, preObject)
         }
+//        getAllPath("zinc.doiche").forEach { path ->
+//            processors.forEachIndexed { index, processor ->
+//                val preObject = objectList[index]
+//                processor.process.invoke(path, preObject)
+//            }
+//        }
         processors.forEachIndexed { index, processor ->
             val preObject = objectList[index]
             processor.postProcess(preObject)
@@ -47,7 +53,7 @@ class ClassLoader {
             jarFile.versionedStream().forEach { jarEntry ->
                 val path = jarEntry.toString().replace('/', '.')
                 if(path.startsWith(packageName) && path.endsWith(".class")) {
-//                    LoggerUtil.prefixedInfo(path)
+                    LoggerUtil.prefixedInfo(path)
                     list.add(path)
                 }
             }
@@ -60,7 +66,7 @@ class ClassLoader {
             val folder = File(Paths.get("./plugins/").toUri());
             val files = folder.listFiles() ?: return;
             for (file in files) {
-                if(!file.name.contains(plugin.name) || !file.name.endsWith(".jar")) {
+                if(!file.name.endsWith(".jar")) {
                     continue
                 }
                 JarFile(file).use(block)
