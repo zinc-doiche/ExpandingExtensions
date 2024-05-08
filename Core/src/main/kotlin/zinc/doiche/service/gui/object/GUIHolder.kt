@@ -1,14 +1,11 @@
 package zinc.doiche.service.gui.`object`
 
+import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.InventoryHolder
-import java.util.*
 
 interface GUIHolder: InventoryHolder {
-    val guiName: String
-    val uuid: UUID
-
-    fun open()
+    fun open(player: Player)
     fun onEvent(inventoryEvent: InventoryEvent, eventType: EventType)
 }
 
@@ -20,4 +17,12 @@ interface ClickableHolder: GUIHolder {
             onClick(inventoryEvent)
         }
     }
+}
+
+enum class EventType {
+    CLICK,
+    DRAG,
+    CLOSE,
+    OPEN,
+    UPDATE
 }
