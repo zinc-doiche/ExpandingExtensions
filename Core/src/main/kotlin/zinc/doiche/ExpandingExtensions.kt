@@ -79,8 +79,8 @@ open class ExpandingExtensions: SuspendingJavaPlugin() {
 
     private fun processAll() {
         ClassLoader()
-//            .add(ProcessorFactory.configuration())
-//            .add(ProcessorFactory.translatable())
+            .add(ProcessorFactory.configuration())
+            .add(ProcessorFactory.translatable())
             .add(ProcessorFactory.service())
             .add(ProcessorFactory.command())
             .process()

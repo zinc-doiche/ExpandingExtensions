@@ -4,7 +4,7 @@ package zinc.doiche.lib
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class TranslateRegistry
+annotation class TranslationRegistry
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)

@@ -1,12 +1,6 @@
 package zinc.doiche.lib.init
 
-import joptsimple.internal.Reflection
 import org.reflections.Reflections
-import zinc.doiche.ExpandingExtensions.Companion.plugin
-import zinc.doiche.util.LoggerUtil
-import java.io.File
-import java.nio.file.Paths
-import java.util.jar.JarFile
 
 class ClassLoader {
     private val processors = ArrayList<Processor<*>>()
@@ -23,54 +17,20 @@ class ClassLoader {
 
     fun process() {
         val objectList = mutableListOf<Any?>()
+        val reflections = Reflections("zinc.doiche")
 
         processors.forEach {
             val preObject = it.preProcess()
             objectList.add(preObject)
         }
 
-        val reflections = Reflections("zinc.doiche")
-
         processors.forEachIndexed { index, processor ->
             val preObject = objectList[index]
             processor.process(reflections, preObject)
         }
-//        getAllPath("zinc.doiche").forEach { path ->
-//            processors.forEachIndexed { index, processor ->
-//                val preObject = objectList[index]
-//                processor.process.invoke(path, preObject)
-//            }
-//        }
         processors.forEachIndexed { index, processor ->
             val preObject = objectList[index]
             processor.postProcess(preObject)
-        }
-    }
-
-    private fun getAllPath(packageName: String): List<String> {
-        val list = mutableListOf<String>()
-        searchInProject { jarFile ->
-            jarFile.versionedStream().forEach { jarEntry ->
-                val path = jarEntry.toString().replace('/', '.')
-                if(path.startsWith(packageName) && path.endsWith(".class")) {
-                    LoggerUtil.prefixedInfo(path)
-                    list.add(path)
-                }
-            }
-        }
-        return list
-    }
-
-    companion object {
-        internal fun searchInProject(block: (JarFile) -> Unit) {
-            val folder = File(Paths.get("./plugins/").toUri());
-            val files = folder.listFiles() ?: return;
-            for (file in files) {
-                if(!file.name.endsWith(".jar")) {
-                    continue
-                }
-                JarFile(file).use(block)
-            }
         }
     }
 }
