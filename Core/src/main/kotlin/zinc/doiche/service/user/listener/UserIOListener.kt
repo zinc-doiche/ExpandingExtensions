@@ -8,7 +8,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import zinc.doiche.lib.ListenerRegistry
 import zinc.doiche.service.user.UserService
-import zinc.doiche.service.user.`object`.User
+import zinc.doiche.service.user.entity.User
 import zinc.doiche.service.user.user
 
 @ListenerRegistry(async = true)

@@ -8,7 +8,7 @@ import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.ListenerRegistry
 import zinc.doiche.util.LoggerUtil.prefixed
 import zinc.doiche.service.user.UserService
-import zinc.doiche.service.user.`object`.QUser.user
+import zinc.doiche.service.user.entity.QUser.user
 
 @ListenerRegistry
 class CommonListener: Listener {

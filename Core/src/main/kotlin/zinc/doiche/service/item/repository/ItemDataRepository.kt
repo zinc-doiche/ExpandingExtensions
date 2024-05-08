@@ -1,19 +1,17 @@
 package zinc.doiche.service.item.repository
 
 import zinc.doiche.lib.Pageable
-import zinc.doiche.database.repository.CachedKeyRepository
-import zinc.doiche.service.item.`object`.ItemData
-import zinc.doiche.service.item.`object`.QItemData.itemData
+import zinc.doiche.database.repository.Repository
+import zinc.doiche.service.item.entity.ItemData
+import zinc.doiche.service.item.entity.QItemData.itemData
 
-class ItemDataRepository(
-    override val prefix: String
-) : CachedKeyRepository<String, ItemData>() {
+class ItemDataRepository: Repository<ItemData>() {
     override fun save(entity: ItemData) {
         entityManager.persist(entity)
     }
 
     fun findAllNames(): List<String> = query
-        .select(itemData.name)
+        .select(itemData.displayedInfo.name)
         .from(itemData)
         .fetch()
 
@@ -21,9 +19,9 @@ class ItemDataRepository(
         val count = query.select(itemData.count())
             .from(itemData)
             .fetchOne() ?: 0
-        val content = query.select(itemData.name)
+        val content = query.select(itemData.displayedInfo.name)
             .from(itemData)
-            .orderBy(itemData.name.asc())
+            .orderBy(itemData.displayedInfo.name.asc())
             .offset((page - 1) * size)
             .limit(size)
             .fetch()
@@ -32,7 +30,7 @@ class ItemDataRepository(
 
     fun findByName(name: String): ItemData? = query
         .selectFrom(itemData)
-        .where(itemData.name.eq(name))
+        .where(itemData.displayedInfo.name.eq(name))
         .fetchFirst()
 
     override fun findById(id: Long): ItemData? {
@@ -40,16 +38,6 @@ class ItemDataRepository(
     }
 
     override fun delete(entity: ItemData) {
-        removeId(entity.name)
         entityManager.remove(entity)
-    }
-
-    fun findCachedByName(name: String): ItemData? {
-        val id = getId(name) ?: run {
-            return findByName(name)?.apply {
-                saveId(name, this.id!!)
-            }
-        }
-        return findById(id)
     }
 }

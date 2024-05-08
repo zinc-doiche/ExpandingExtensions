@@ -1,4 +1,4 @@
-package zinc.doiche.service.world.`object`
+package zinc.doiche.service.world.entity
 
 import jakarta.persistence.*
 import zinc.doiche.lib.embeddable.DisplayedInfo
@@ -6,16 +6,19 @@ import zinc.doiche.lib.embeddable.DisplayedInfo
 @Entity
 class AccessLevel(
     @Embedded
-    val displayedInfo: DisplayedInfo
+    val displayedInfo: DisplayedInfo,
+
+    @Column(nullable = false)
+    val level: Int
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "extensionWorldId")
+    @JoinColumn(name = "EXTENSION_WORLD_ID")
     val extensionWorld: ExtensionWorld? = null
 
-    @OneToMany(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val regions: MutableList<Region> = mutableListOf()
 }

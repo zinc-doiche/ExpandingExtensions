@@ -15,9 +15,15 @@ class DisplayedInfo(
 
     @Convert(converter = StringArrayConverter::class, attributeName = "description")
     @Column(nullable = true)
-    val description: Array<String>
+    val description: Array<String>? = null
 ) {
     fun displayName() = MiniMessage.miniMessage().deserialize(displayName)
 
-    fun description() = description.map(MiniMessage.miniMessage()::deserialize)
+    fun displayName(replace: (String) -> String) = MiniMessage.miniMessage().deserialize(replace(displayName))
+
+    fun description() = description?.map(MiniMessage.miniMessage()::deserialize)
+
+    fun description(replace: (String) -> String) = description?.map {
+        MiniMessage.miniMessage().deserialize(replace(displayName))
+    }
 }

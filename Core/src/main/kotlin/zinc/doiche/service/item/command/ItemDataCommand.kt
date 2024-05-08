@@ -58,7 +58,7 @@ class ItemDataCommand {
                 .executesAsPlayer { context, player ->
                     val name = context.getArgument("name", String::class.java)
                     plugin.launch {
-                        ItemDataService.repository.findCachedByName(name)?.let {
+                        ItemDataService.repository.findByName(name)?.let {
                             player.sendMessage(LoggerUtil.prefixed("이미 존재하는 이름입니다: $name", NamedTextColor.RED))
                         } ?: run {
                             val itemInMainHand = player.inventory.itemInMainHand

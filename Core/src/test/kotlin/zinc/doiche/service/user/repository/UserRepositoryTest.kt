@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import zinc.doiche.database.repository.Repository
 import zinc.doiche.service.RepositoryTest
 import zinc.doiche.service.user.UserService
-import zinc.doiche.service.user.`object`.User
+import zinc.doiche.service.user.entity.User
 import java.util.*
 
 class UserRepositoryTest: RepositoryTest<User>() {

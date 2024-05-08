@@ -4,7 +4,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minecraft.nbt.CompoundTag
 import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
-import zinc.doiche.service.item.`object`.ItemData
+import zinc.doiche.lib.embeddable.DisplayedInfo
+import zinc.doiche.service.item.ItemDataService
+import zinc.doiche.service.item.entity.ItemData
 
 internal fun ItemStack.editTag(block: (CompoundTag) -> Unit): ItemStack {
     val item = CraftItemStack.unwrap(this)
@@ -24,11 +26,17 @@ internal fun ItemStack.setTag(tag: CompoundTag): ItemStack {
 internal fun ItemStack.hasTag() = CraftItemStack.unwrap(this).hasTag()
 
 internal fun ItemStack.toData(name: String = this.type.name) = ItemData(
-    name,
+    DisplayedInfo(
+        name,
+        this.itemMeta.displayName()?.let { MiniMessage.miniMessage().serialize(it) } ?: "",
+        this.lore()?.map {
+            MiniMessage.miniMessage().serialize(it)
+        }?.toTypedArray()
+    ),
     this.type,
-    this.itemMeta.displayName()?.let { MiniMessage.miniMessage().serialize(it) } ?: "",
-    this.lore()?.map {
-        MiniMessage.miniMessage().serialize(it)
-    }?.toTypedArray() ?: emptyArray(),
-    tag?.asString?.asMap() ?: mutableMapOf()
+    tag?.apply { remove("id") }?.asString?.asMap() ?: mutableMapOf()
 )
+
+internal fun ItemStack.toPersistData(): ItemData? = tag?.getString("id")?.toLongOrNull()?.let { id ->
+    ItemDataService.repository.findById(id)
+}

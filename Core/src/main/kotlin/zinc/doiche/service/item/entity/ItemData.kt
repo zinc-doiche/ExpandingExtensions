@@ -1,13 +1,11 @@
-package zinc.doiche.service.item.`object`
+package zinc.doiche.service.item.entity
 
 import jakarta.persistence.*
-import net.kyori.adventure.text.minimessage.MiniMessage.miniMessage
 import net.minecraft.nbt.TagParser
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
-import zinc.doiche.database.StringArrayConverter
 import zinc.doiche.lib.embeddable.DisplayedInfo
 import zinc.doiche.util.serialize
 import zinc.doiche.util.setTag
@@ -18,18 +16,9 @@ class ItemData(
     @Embedded
     val displayedInfo: DisplayedInfo,
 
-//    @Column(unique = true, nullable = false)
-//    val name: String,
-
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     val material: Material,
-
-//    @Column(nullable = false)
-//    val displayName: String,
-
-    @Convert(converter = StringArrayConverter::class, attributeName = "lore")
-    @Column(nullable = false)
-    var lore: Array<String> = emptyArray<String>(),
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(nullable = false, columnDefinition = "json")
@@ -41,10 +30,11 @@ class ItemData(
 
     fun displayName() = displayedInfo.displayName()// = miniMessage().deserialize(displayName)
 
-    fun lore() = lore.map(miniMessage()::deserialize)
+    fun lore() = displayedInfo.description()
 
     fun getItem(amount: Int = 1): ItemStack {
-        val item = ItemStack(material, amount).setTag(TagParser.parseTag(tags.serialize()))
+        val tag = TagParser.parseTag(tags.apply { put("id", id!!) }.serialize())
+        val item = ItemStack(material, amount).setTag(tag)
         item.editMeta { meta ->
             meta.displayName(displayName())
             meta.lore(lore())
@@ -66,6 +56,6 @@ class ItemData(
     }
 
     override fun toString(): String {
-        return "ItemData(displayedInfo=$displayedInfo, material=$material, lore=${lore.contentToString()}, tags=$tags, id=$id)"
+        return "ItemData(displayedInfo=$displayedInfo, material=$material, tags=$tags, id=$id)"
     }
 }

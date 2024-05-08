@@ -2,7 +2,7 @@ package zinc.doiche.service.world
 
 import zinc.doiche.service.Service
 
-class WorldService: Service {
+class ExtensionWorldService: Service {
     override fun onLoad() {
     }
 

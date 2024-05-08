@@ -4,10 +4,11 @@ import org.bukkit.Material
 import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import zinc.doiche.lib.embeddable.DisplayedInfo
 import zinc.doiche.service.RepositoryTest
 
 import zinc.doiche.service.item.ItemDataService
-import zinc.doiche.service.item.`object`.ItemData
+import zinc.doiche.service.item.entity.ItemData
 
 class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
     override val repository = ItemDataService.repository
@@ -15,13 +16,15 @@ class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
 
     private fun saveOne(name: String): ItemData {
         val itemData = ItemData(
-            name,
-            Material.PAPER,
-            "<!i><rainbow>test test test",
-            arrayOf(
-                "<!i><white><bold>bold lore",
-                "<!i><white><bold>bold lore"
+            DisplayedInfo(
+                name,
+                "<!i><rainbow>test test test",
+                arrayOf(
+                    "<!i><white><bold>bold lore",
+                    "<!i><white><bold>bold lore"
+                )
             ),
+            Material.PAPER,
             mutableMapOf(
                 "key" to 1234
             )
@@ -36,9 +39,11 @@ class ItemDataRepositoryTest: RepositoryTest<ItemData>() {
         repository.transaction {
             repeat(amount) { i ->
                 save(ItemData(
-                    "test $i",
+                    DisplayedInfo(
+                        "test $i",
+                        "<!i><rainbow>test $i"
+                    ),
                     Material.PAPER,
-                    "<!i><rainbow>test $i",
                 ))
             }
         }
