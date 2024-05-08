@@ -1,4 +1,4 @@
-package zinc.doiche.database.`object`
+package zinc.doiche.lib.embeddable
 
 import jakarta.persistence.Embeddable
 import java.time.LocalDateTime

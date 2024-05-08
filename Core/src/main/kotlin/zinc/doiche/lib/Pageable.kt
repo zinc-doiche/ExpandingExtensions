@@ -1,4 +1,4 @@
-package zinc.doiche.database.`object`
+package zinc.doiche.lib
 
 import kotlin.math.floor
 

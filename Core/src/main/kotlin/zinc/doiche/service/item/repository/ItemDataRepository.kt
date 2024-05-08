@@ -1,7 +1,6 @@
 package zinc.doiche.service.item.repository
 
-import com.querydsl.core.types.Projections
-import zinc.doiche.database.`object`.Pageable
+import zinc.doiche.lib.Pageable
 import zinc.doiche.database.repository.CachedKeyRepository
 import zinc.doiche.service.item.`object`.ItemData
 import zinc.doiche.service.item.`object`.QItemData.itemData

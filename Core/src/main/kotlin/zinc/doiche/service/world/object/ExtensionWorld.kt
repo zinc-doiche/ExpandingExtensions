@@ -1,14 +1,18 @@
 package zinc.doiche.service.world.`object`
 
-import com.google.common.collect.Table
-import com.google.common.collect.Tables
-import org.bukkit.block.Biome
+import jakarta.persistence.*
+import zinc.doiche.lib.embeddable.DisplayedInfo
 
+@Entity
+@Table(name = "TBL_EXTENSION_WORLD")
 class ExtensionWorld(
-    val name: String,
-    val displayName: String,
-    val description: Array<String>,
-    val accessLevel: Table<Int, Biome, AccessLevel> = Tables.newCustomTable()
+    @Embedded
+    val displayedInfo: DisplayedInfo
 ) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    val id: Long? = null
 
+    @OneToMany(mappedBy = "extensionWorld", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val accessLevels: MutableList<AccessLevel> = mutableListOf()
 }

@@ -8,20 +8,24 @@ import org.bukkit.inventory.ItemStack
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import zinc.doiche.database.StringArrayConverter
+import zinc.doiche.lib.embeddable.DisplayedInfo
 import zinc.doiche.util.serialize
 import zinc.doiche.util.setTag
 
 @Entity
 @Table(name = "TBL_ITEM_DATA")
 class ItemData(
-    @Column(unique = true, nullable = false)
-    val name: String,
+    @Embedded
+    val displayedInfo: DisplayedInfo,
+
+//    @Column(unique = true, nullable = false)
+//    val name: String,
 
     @Column(nullable = false)
     val material: Material,
 
-    @Column(nullable = false)
-    val displayName: String,
+//    @Column(nullable = false)
+//    val displayName: String,
 
     @Convert(converter = StringArrayConverter::class, attributeName = "lore")
     @Column(nullable = false)
@@ -35,7 +39,7 @@ class ItemData(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
 
-    fun displayName() = miniMessage().deserialize(displayName)
+    fun displayName() = displayedInfo.displayName()// = miniMessage().deserialize(displayName)
 
     fun lore() = lore.map(miniMessage()::deserialize)
 
@@ -62,6 +66,6 @@ class ItemData(
     }
 
     override fun toString(): String {
-        return "ItemData(name='$name', material=$material, displayName='$displayName', lore=${lore.contentToString()}, tags=$tags, id=$id)"
+        return "ItemData(displayedInfo=$displayedInfo, material=$material, lore=${lore.contentToString()}, tags=$tags, id=$id)"
     }
 }

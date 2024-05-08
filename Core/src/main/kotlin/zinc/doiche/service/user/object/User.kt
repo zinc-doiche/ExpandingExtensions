@@ -10,7 +10,7 @@ import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import zinc.doiche.database.`object`.Period
+import zinc.doiche.lib.embeddable.Period
 import java.util.*
 
 @Entity
