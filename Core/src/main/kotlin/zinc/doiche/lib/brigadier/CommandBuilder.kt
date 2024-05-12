@@ -4,14 +4,16 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.server.MinecraftServer
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer
-import org.bukkit.craftbukkit.v1_20_R3.command.VanillaCommandWrapper
+import org.bukkit.craftbukkit.CraftServer
+import org.bukkit.craftbukkit.command.VanillaCommandWrapper
 import org.bukkit.entity.Player
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.brigadier.argument.LiteralArgument
 import zinc.doiche.lib.brigadier.argument.PlayerArgument
 import zinc.doiche.lib.brigadier.argument.UUIDArgument
@@ -38,8 +40,18 @@ interface CommandBuilder {
         fun command(builder: LiteralArgumentBuilder<CommandSourceStack>): Command {
             val craftServer: CraftServer = Bukkit.getServer() as CraftServer
             val minecraftServer: MinecraftServer = craftServer.server
-            val commands: Commands = minecraftServer.vanillaCommandDispatcher
+            val commands: Commands = minecraftServer.commands
             val dispatcher: CommandDispatcher<CommandSourceStack> = commands.dispatcher
+
+//            plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
+//                event.registrar().register(
+//                    plugin.pluginMeta,
+//                    io.papermc.paper.command.brigadier.Commands.literal("")
+//                        .build(),
+//                    null,
+//                    emptyList()
+//                )
+//            })
 
             return VanillaCommandWrapper(commands, dispatcher.register(builder))
         }

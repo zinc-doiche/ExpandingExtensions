@@ -4,7 +4,7 @@ import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
-    val kotlinVersion = "1.9.10"
+    val kotlinVersion = "1.9.24"
 
     kotlin("kapt") version kotlinVersion apply false
     kotlin("plugin.jpa") version kotlinVersion apply false
