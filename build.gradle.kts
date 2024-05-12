@@ -1,4 +1,6 @@
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
+import io.papermc.paperweight.userdev.PaperweightUserExtension
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
@@ -9,7 +11,7 @@ plugins {
     kotlin("plugin.allopen") version kotlinVersion apply false
     kotlin("plugin.noarg") version kotlinVersion apply false
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
-    id("io.papermc.paperweight.userdev") version "1.5.12" apply false
+    id("io.papermc.paperweight.userdev") version "1.7.1" apply false
 }
 
 subprojects {
@@ -47,6 +49,14 @@ subprojects {
         }
     }
 
+    extensions.getByType(PaperweightUserExtension::class).apply {
+        reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
+    }
+
+    extensions.getByType(JavaPluginExtension::class).apply {
+        toolchain.languageVersion = JavaLanguageVersion.of(21)
+    }
+
     dependencies {
         val implementation by configurations
         val compileOnly by configurations
@@ -59,7 +69,7 @@ subprojects {
             implementation(project(":Core", "runtimeElements"))
         }
 
-        paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
+        paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
         implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.15.0")
         implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.15.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
@@ -120,9 +130,6 @@ subprojects {
         }
         withType<Test> {
             useJUnitPlatform()
-        }
-        withType<Assemble> {
-            dependsOn(named("reobfJar"))
         }
     }
 }
