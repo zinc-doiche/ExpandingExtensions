@@ -2,6 +2,9 @@ package zinc.doiche.lib.init
 
 import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
+import com.mojang.brigadier.tree.LiteralCommandNode
+import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
@@ -47,23 +50,37 @@ interface ProcessorFactory<T> {
             }
             .create()
 
-        fun command(): Processor<Nothing> = factory<Nothing>()
-            .process { reflections, _ ->
+        fun command(): Processor<MutableList<CommandHolder>> = factory<MutableList<CommandHolder>>()
+            .preProcess {
+                mutableListOf()
+            }
+            .process { reflections, list ->
                 reflections.getTypesAnnotatedWith(CommandRegistry::class.java).forEach { clazz ->
                     val commandRegistry = clazz.getDeclaredConstructor().newInstance()
-                    val commandMap = Bukkit.getCommandMap()
+//                    val commandMap = Bukkit.getCommandMap()
                     for (method in clazz.declaredMethods) {
                         if(method.isAnnotationPresent(CommandFactory::class.java)) {
                             val factory = method.getAnnotation(CommandFactory::class.java)
                             val aliases = factory.aliases
-                            val command = method.invoke(commandRegistry) as Command
+                            val description = factory.description
+                            @Suppress("UNCHECKED_CAST")
+                            val commandBuilder = method.invoke(commandRegistry) as LiteralCommandNode<CommandSourceStack>
 
-                            command.aliases = aliases.toMutableList()
-                            logCommand(command)
-                            commandMap.register(plugin.name, command)
+                            CommandHolder(commandBuilder, aliases.toList(), description).let {
+                                list?.add(it)
+                            }
                         }
                     }
                 }
+            }
+            .postProcess { list ->
+                plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS.newHandler { event ->
+                    val registrar = event.registrar()
+                    list?.forEach { commandHolder ->
+                        logCommand(commandHolder)
+                        commandHolder.register(registrar)
+                    }
+                })
             }
             .create()
 
@@ -216,10 +233,10 @@ interface ProcessorFactory<T> {
             }
             .create()
 
-        private fun logCommand(command: Command) = LoggerUtil.prefixedInfo(text("[")
+        private fun logCommand(commandHolder: CommandHolder) = LoggerUtil.prefixedInfo(text("[")
             .append("Command", NamedTextColor.LIGHT_PURPLE)
             .append("] Registering ")
-            .append("'${command.name}' ~")
-            .append(command.aliases.toString()))
+            .append("'${commandHolder.commandBuilder.name}' ~")
+            .append(commandHolder.aliases.toString()))
     }
 }

@@ -18,7 +18,7 @@ annotation class CommandRegistry
 
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class CommandFactory(val aliases: Array<String> = [])
+annotation class CommandFactory(val aliases: Array<String> = [], val description: String = "")
 
 // ===== File Configurations
 

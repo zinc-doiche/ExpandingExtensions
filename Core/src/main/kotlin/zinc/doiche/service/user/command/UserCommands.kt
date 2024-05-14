@@ -1,23 +1,29 @@
 package zinc.doiche.service.user.command
 
+import com.mojang.brigadier.Command
+import io.papermc.paper.command.brigadier.Commands
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.command.Command
-import zinc.doiche.lib.CommandFactory
-import zinc.doiche.lib.CommandRegistry
-import zinc.doiche.lib.brigadier.CommandBuilder
+import zinc.doiche.lib.*
 
 @CommandRegistry
 class UserCommands {
-    @CommandFactory
-    fun profile(): Command = CommandBuilder.simple("profile") { _, player ->
-        player.openInventory(Bukkit.createInventory(null, 54, Component.text("profile")))
-        CommandBuilder.SINGLE_SUCCESS
-    }
+//    @CommandFactory
+//    fun profile() = CommandBuilder.simple("profile") { _, player ->
+//        player.openInventory(Bukkit.createInventory(null, 54, Component.text("profile")))
+//        CommandBuilder.SINGLE_SUCCESS
+//    }
+//
+//    @CommandFactory
+//    fun menu() = Commands.literal("menu") { _, player ->
+//        player.openInventory(Bukkit.createInventory(null, 54, Component.text("menu")))
+//        CommandBuilder.SINGLE_SUCCESS
+//    }
 
     @CommandFactory
-    fun menu(): Command = CommandBuilder.simple("menu") { _, player ->
-        player.openInventory(Bukkit.createInventory(null, 54, Component.text("menu")))
-        CommandBuilder.SINGLE_SUCCESS
-    }
+    fun test() = Commands.literal("test")
+        .requiresOp()
+        .executesPlayer { context, player ->
+            player.sendMessage(Component.text("test"))
+            Command.SINGLE_SUCCESS
+        }.build()
 }
