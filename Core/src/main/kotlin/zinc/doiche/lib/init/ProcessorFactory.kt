@@ -127,32 +127,31 @@ interface ProcessorFactory<T> {
                 }
             }
             .postProcess { multimap ->
-                val sorted = multimap?.asMap()
-                    ?.toSortedMap(Comparator.naturalOrder<Int>().reversed()) ?: return@postProcess
+                multimap?.asMap()?.toSortedMap(Comparator.naturalOrder<Int>().reversed())?.let { sorted ->
+                    sorted.forEach { (_, list) ->
+                        list.forEach { method ->
+                            val type = method.parameterTypes[0]
+                            val read = method.getAnnotation(Read::class.java)
+                            val path = read.path
+                            val originFile = File(plugin.dataFolder, path)
 
-                sorted.forEach { (_, list) ->
-                    list.forEach { method ->
-                        val type = method.parameterTypes[0]
-                        val read = method.getAnnotation(Read::class.java)
-                        val path = read.path
-                        val originFile = File(plugin.dataFolder, path)
-
-                        if(type == File::class.java) {
-                            if(!originFile.exists()) {
-                                plugin.getResource(path)?.let {
-                                    plugin.saveResource(path, false)
-                                } ?: run {
-                                    originFile.mkdirs()
-                                    originFile.createNewFile()
+                            if(type == File::class.java) {
+                                if(!originFile.exists()) {
+                                    plugin.getResource(path)?.let {
+                                        plugin.saveResource(path, false)
+                                    } ?: run {
+                                        originFile.mkdirs()
+                                        originFile.createNewFile()
+                                    }
                                 }
+                                method.invoke(null, originFile)
+                            } else {
+                                if(!originFile.exists()) {
+                                    originFile.mkdirs()
+                                }
+                                val files = originFile.listFiles()
+                                method.invoke(null, files)
                             }
-                            method.invoke(null, originFile)
-                        } else {
-                            if(!originFile.exists()) {
-                                originFile.mkdirs()
-                            }
-                            val files = originFile.listFiles()
-                            method.invoke(null, files)
                         }
                     }
                 }

@@ -1,13 +1,15 @@
 package zinc.doiche.service.item.command
 
 import com.github.shynixn.mccoroutine.bukkit.launch
+import com.mojang.brigadier.Command
+import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.mojang.brigadier.arguments.StringArgumentType
+import io.papermc.paper.command.brigadier.Commands
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import zinc.doiche.ExpandingExtensions.Companion.plugin
-import zinc.doiche.lib.CommandFactory
-import zinc.doiche.lib.CommandRegistry
-import zinc.doiche.lib.brigadier.CommandBuilder
+import zinc.doiche.lib.*
 import zinc.doiche.util.LoggerUtil
 import zinc.doiche.service.item.ItemDataService
 import zinc.doiche.util.append
@@ -17,10 +19,10 @@ import zinc.doiche.util.toData
 @CommandRegistry
 class ItemDataCommand {
     @CommandFactory
-    fun data() = CommandBuilder.literal("itemdata")
+    fun data() = Commands.literal("itemdata")
         .requiresOp()
-        .then(CommandBuilder.literal("debug")
-            .executesAsPlayer { _, player ->
+        .then(Commands.literal("debug")
+            .executesPlayer { _, player ->
                 player.inventory.itemInMainHand.let {
                     if(it.isEmpty) {
                         player.sendMessage(LoggerUtil.prefixed("손에 아이템을 들고 있어야 합니다", NamedTextColor.RED))
@@ -29,33 +31,33 @@ class ItemDataCommand {
                         player.sendMessage(it.tag.toString())
                     }
                 }
-                CommandBuilder.SINGLE_SUCCESS
+                Command.SINGLE_SUCCESS
             })
-        .then(CommandBuilder.literal("get")
-            .then(CommandBuilder.string("name")
+        .then(Commands.literal("get")
+            .then(Commands.argument("name", StringArgumentType.string())
                 .suggestArguments {
                     ItemDataService.repository.findAllNames()
                 }
-                .executesAsPlayer { context, player ->
+                .executesPlayer { context, player ->
                     val name = context.getArgument("name", String::class.java)
                     plugin.launch {
                         get(player, name)
                     }
-                    CommandBuilder.SINGLE_SUCCESS
+                    Command.SINGLE_SUCCESS
                 }
-                .then(CommandBuilder.integer("amount", 1, 64)
-                    .executesAsPlayer { context, player ->
+                .then(Commands.argument("amount", IntegerArgumentType.integer(1, 64))
+                    .executesPlayer { context, player ->
                         val name = context.getArgument("name", String::class.java)
                         val amount = context.getArgument("amount", Int::class.java)
                         plugin.launch {
                             get(player, name, amount)
                         }
-                        CommandBuilder.SINGLE_SUCCESS
+                        Command.SINGLE_SUCCESS
                     }
                 )))
-        .then(CommandBuilder.literal("add")
-            .then(CommandBuilder.string("name")
-                .executesAsPlayer { context, player ->
+        .then(Commands.literal("add")
+            .then(Commands.argument("name", StringArgumentType.string())
+                .executesPlayer { context, player ->
                     val name = context.getArgument("name", String::class.java)
                     plugin.launch {
                         ItemDataService.repository.findByName(name)?.let {
@@ -73,22 +75,22 @@ class ItemDataCommand {
                             player.sendMessage(LoggerUtil.prefixed("${name}(을)를 추가하였습니다"))
                         }
                     }
-                    CommandBuilder.SINGLE_SUCCESS
+                    Command.SINGLE_SUCCESS
                 }))
-        .then(CommandBuilder.literal("list")
-            .then(CommandBuilder.integer("page", 1, Int.MAX_VALUE)
-                .executesAsPlayer { context, player ->
+        .then(Commands.literal("list")
+            .then(Commands.argument("page", IntegerArgumentType.integer(1))
+                .executesPlayer { context, player ->
                     val page = context.getArgument("page", Int::class.java)
                     plugin.launch {
                         list(player, page)
                     }
-                    CommandBuilder.SINGLE_SUCCESS
+                    Command.SINGLE_SUCCESS
                 })
-            .executesAsPlayer { _, player ->
+            .executesPlayer { _, player ->
                 plugin.launch {
                     list(player)
                 }
-                CommandBuilder.SINGLE_SUCCESS
+                Command.SINGLE_SUCCESS
             })
         .build()
 
