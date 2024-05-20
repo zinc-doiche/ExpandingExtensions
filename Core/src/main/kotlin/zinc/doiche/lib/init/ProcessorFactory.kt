@@ -135,6 +135,8 @@ interface ProcessorFactory<T> {
                             val path = read.path
                             val originFile = File(plugin.dataFolder, path)
 
+                            method.isAccessible = true
+
                             if(type == File::class.java) {
                                 if(!originFile.exists()) {
                                     plugin.getResource(path)?.let {
@@ -152,6 +154,8 @@ interface ProcessorFactory<T> {
                                 val files = originFile.listFiles()
                                 method.invoke(null, files)
                             }
+
+                            method.isAccessible = false
                         }
                     }
                 }
