@@ -189,7 +189,7 @@ interface ProcessorFactory<T> {
                         }
                     }
 
-                    val map = file.toMapOf(String::class.java, Any::class.java).toMutableMap()
+                    val map = file.toMapOf(String::class.java, Any::class.java)?.toMutableMap() ?: return@process
                     val newKeys = mutableSetOf<String>()
                     val keys = mutableSetOf<String>()
 
