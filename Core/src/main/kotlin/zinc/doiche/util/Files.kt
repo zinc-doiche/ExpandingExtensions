@@ -9,9 +9,9 @@ internal fun <T> File.toObject(typeToken: TypeToken<T>): T = reader().use { gson
 @Suppress("UNCHECKED_CAST")
 internal fun <K, V> File.toMapOf(
     keyClass: Class<K>, valueClass: Class<V>
-): Map<K, V>? = reader().use {
+): Map<K, V> = reader().use {
     val typeToken = TypeToken.getParameterized(Map::class.java, keyClass, valueClass)
     gson.fromJson(it, typeToken)
-} as? Map<K, V>
+} as? Map<K, V> ?: mutableMapOf()
 
 internal fun File.writeJson(obj: Any) = writer().use { gson.toJson(obj, it) }
