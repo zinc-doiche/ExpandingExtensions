@@ -203,8 +203,10 @@ interface ProcessorFactory<T> {
                             @Suppress("UNCHECKED_CAST")
                             val value = (map[key]?.apply {
                                 keys.add(key)
-                            } ?: map.put(key, translatable.defaultValue).apply {
+                            } ?: run {
+                                map[key] = translatable.defaultValue
                                 newKeys.add(key)
+                                translatable.defaultValue
                             }) as Array<String>
 
                             when(type) {
