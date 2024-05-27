@@ -20,10 +20,19 @@ class SeasonManager internal constructor() {
     lateinit var configuration: Config
         private set
 
+    fun addRotation(rotation: Rotation) {
+        rotations.add(rotation)
+    }
+
+    fun removeRotation(rotation: Rotation) {
+        rotations.remove(rotation)
+    }
+
     @Read("config.json")
     private fun read(file: File) {
         val config = file.toObject(Config::class.java)
         val current = LocalDateTime.now()
+        val currentDate = current.toLocalDate();
         val firstInitDateTime = LocalDateTime.of(LocalDate.now(), config.initTime)
 
         configuration = config
@@ -40,6 +49,9 @@ class SeasonManager internal constructor() {
             ExtensionWorldService.repository.findByName(rotation.worldName)?.let {
                 rotation.worldId = it.id
             }
+            if(rotation.startDate.isBefore(currentDate) && rotation.endDate.isAfter(currentDate)) {
+                addRotation(rotation)
+            }
         }
     }
 
@@ -55,11 +67,11 @@ class SeasonManager internal constructor() {
             val endDateNext = rotation.endDate.plusDays(1)
 
             if(endDateNext.isEqual(currentDate)) {
-                rotations.remove(rotation)
+                removeRotation(rotation)
                 continue
             }
             if(rotation.startDate.isEqual(currentDate)) {
-                rotations.add(rotation)
+                addRotation(rotation)
             }
         }
     }
@@ -70,6 +82,7 @@ data class Rotation(
     val startDate: LocalDate,
     val endDate: LocalDate
 ) {
+    @Transient
     var worldId: Long? = null
         set(value) {
             if(field != null) {

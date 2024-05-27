@@ -1,29 +1,24 @@
 package zinc.doiche.util
 
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.minecraft.core.component.DataComponentPatch
+import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.CompoundTag
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack
+import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
 import zinc.doiche.lib.embeddable.DisplayedInfo
 import zinc.doiche.service.item.ItemDataService
 import zinc.doiche.service.item.entity.ItemData
 
-internal fun ItemStack.editTag(block: (CompoundTag) -> Unit): ItemStack {
-    val item = CraftItemStack.unwrap(this)
-    block(item.orCreateTag)
-    return CraftItemStack.asBukkitCopy(item)
-}
+internal fun ItemStack.editTag(
+    builder: (DataComponentPatch.Builder) -> DataComponentPatch
+): ItemStack = CraftItemStack.unwrap(this).apply {
+    val components = builder(DataComponentPatch.builder())
+    applyComponents(components)
+}.asBukkitCopy()
 
 internal val ItemStack.tag: CompoundTag?
-    get() = CraftItemStack.unwrap(this).tag
-
-internal fun ItemStack.setTag(tag: CompoundTag): ItemStack {
-    val unwrap = CraftItemStack.unwrap(this)
-    unwrap.tag = tag
-    return CraftItemStack.asBukkitCopy(unwrap)
-}
-
-internal fun ItemStack.hasTag() = CraftItemStack.unwrap(this).hasTag()
+    get() = CraftItemStack.unwrap(this).components.get(DataComponents.CUSTOM_DATA)?.copyTag()
 
 internal fun ItemStack.toData(name: String = this.type.name) = ItemData(
     DisplayedInfo(

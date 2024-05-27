@@ -1,14 +1,16 @@
 package zinc.doiche.service.item.entity
 
 import jakarta.persistence.*
+import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.TagParser
+import net.minecraft.world.item.component.CustomData
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import zinc.doiche.lib.embeddable.DisplayedInfo
+import zinc.doiche.util.editTag
 import zinc.doiche.util.serialize
-import zinc.doiche.util.setTag
 
 @Entity
 @Table(name = "TBL_ITEM_DATA")
@@ -34,7 +36,10 @@ class ItemData(
 
     fun getItem(amount: Int = 1): ItemStack {
         val tag = TagParser.parseTag(tags.apply { put("id", id!!) }.serialize())
-        val item = ItemStack(material, amount).setTag(tag)
+        val item = ItemStack(material, amount).editTag { builder -> builder
+            .set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+            .build()
+        }
         item.editMeta { meta ->
             meta.displayName(displayName())
             meta.lore(lore())

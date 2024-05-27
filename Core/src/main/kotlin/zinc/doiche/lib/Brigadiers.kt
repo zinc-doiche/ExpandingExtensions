@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import org.bukkit.entity.Player
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 
