@@ -1,4 +1,5 @@
 
+
 tasks {
     jar {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -9,8 +10,12 @@ tasks {
     }
 
     reobfJar {
+        val fileName = "${project.name}-$version"
+        val path: String = env.OUTPUT_PATH.value
+//        file("Y:\\home\\minecraft\\20.6\\plugins\\.jar")
+        val file = file(path.replace("<name>", fileName))
+
         dependsOn(jar)
-//        inputJar.set(jar.get().archiveFile)
-        outputJar.set(file("Y:\\home\\minecraft\\20.6\\plugins\\${project.name}-$version.jar"))
+        outputJar.set(file)
     }
 }

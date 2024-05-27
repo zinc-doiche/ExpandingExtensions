@@ -12,6 +12,7 @@ plugins {
     kotlin("plugin.noarg") version kotlinVersion apply false
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("io.papermc.paperweight.userdev") version "1.7.1" apply false
+    id("co.uzzu.dotenv.gradle") version "4.0.0" apply true
 }
 
 subprojects {
