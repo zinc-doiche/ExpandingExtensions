@@ -11,6 +11,6 @@ tasks {
     reobfJar {
         dependsOn(jar)
 //        inputJar.set(jar.get().archiveFile)
-        outputJar.set(file("Y:\\home\\minecraft\\20.4\\plugins\\${project.name}-$version.jar"))
+        outputJar.set(file("Y:\\home\\minecraft\\20.6\\plugins\\${project.name}-$version.jar"))
     }
 }
