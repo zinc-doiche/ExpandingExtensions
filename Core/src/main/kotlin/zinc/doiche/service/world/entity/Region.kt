@@ -5,6 +5,7 @@ import org.bukkit.block.Biome
 import zinc.doiche.lib.embeddable.DisplayedInfo
 
 @Entity
+@Table(name = "TBL_REGION")
 class Region(
     @Column(unique = true, nullable = false)
     @Enumerated(EnumType.STRING)

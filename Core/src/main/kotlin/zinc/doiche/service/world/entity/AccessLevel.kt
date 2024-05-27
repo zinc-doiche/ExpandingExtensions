@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import zinc.doiche.lib.embeddable.DisplayedInfo
 
 @Entity
+@Table(name = "TBL_ACCESS_LEVEL")
 class AccessLevel(
     @Embedded
     val displayedInfo: DisplayedInfo,

@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 
 @Entity
+@Table(name = "TBL_GUI_TITLE")
 class GUITitle(
     @Column(nullable = false)
     val title: String
