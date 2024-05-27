@@ -209,6 +209,8 @@ interface ProcessorFactory<T> {
                                 translatable.defaultValue
                             }) as Array<String>
 
+                            field.isAccessible = true
+
                             when(type) {
                                 String::class.java -> {
                                     field.set(null, value[0])
