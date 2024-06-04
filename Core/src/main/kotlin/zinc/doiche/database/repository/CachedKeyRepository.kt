@@ -4,7 +4,7 @@ import redis.clients.jedis.JedisPooled
 import zinc.doiche.ExpandingExtensions
 import zinc.doiche.database.CachePoolFactory
 
-abstract class CachedKeyRepository<I, E>: Repository<E>() {
+abstract class CachedKeyRepository<K, E>: Repository<E>() {
     protected abstract val prefix: String
 
     protected val jedisPooled: JedisPooled by lazy {
@@ -15,15 +15,15 @@ abstract class CachedKeyRepository<I, E>: Repository<E>() {
         }
     }
 
-    fun saveId(identifier: I, id: Long) {
+    fun saveId(identifier: K, id: Long) {
         jedisPooled.set("$prefix:$identifier", id.toString())
     }
 
-    fun removeId(identifier: I) {
+    fun removeId(identifier: K) {
         jedisPooled.del("$prefix:$identifier")
     }
 
-    fun getId(identifier: I): Long? {
+    fun getId(identifier: K): Long? {
         return jedisPooled.get("$prefix:$identifier")?.toLong()
     }
 }

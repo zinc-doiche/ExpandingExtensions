@@ -15,7 +15,7 @@ class CommonListener: Listener {
     @EventHandler
     fun onReload(event: ServerLoadEvent) {
         if(event.type == ServerLoadEvent.LoadType.RELOAD) {
-            plugin.server.broadcast(prefixed("Reload User Data..."))
+            plugin.server.broadcast(prefixed("유저 정보를 다시 불러옵니다..."))
 
             val uuidList = Bukkit.getOnlinePlayers().map { it.uniqueId }
             val idMap = plugin.query
