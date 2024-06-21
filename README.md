@@ -1,6 +1,6 @@
 Vanila+ Rogue-like SMP
 
-# structure
+# structure (WIP)
 
 |Lobby Server|Explore Servers(many)|Workspace Server(many)|
 |:-:|:-:|:-:|
