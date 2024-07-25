@@ -1,6 +1,10 @@
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
+import org.hidetake.groovy.ssh.connection.AllowAnyHosts
+import org.hidetake.groovy.ssh.core.Remote
+import org.hidetake.groovy.ssh.core.RunHandler
+import org.hidetake.groovy.ssh.session.SessionHandler
 import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
 
 plugins {
@@ -13,7 +17,18 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("io.papermc.paperweight.userdev") version "1.7.1" apply false
     id("co.uzzu.dotenv.gradle") version "4.0.0" apply true
+    id("org.hidetake.ssh") version "2.11.2" apply true
 }
+
+val server = Remote(
+    mapOf<String, Any>(
+        "host" to project.property("host") as String,
+        "port" to (project.property("port") as String).toInt(),
+        "user" to project.property("user") as String,
+        "password" to project.property("password") as String,
+        "knownHosts" to AllowAnyHosts.instance
+    )
+)
 
 subprojects {
     apply {
@@ -101,10 +116,10 @@ subprojects {
 
         implementation("com.fasterxml.jackson.core:jackson-core:2.16.2")
         implementation("com.fasterxml.jackson.core:jackson-databind:2.16.2")
-        // JUnit Jupiter API and Engine dependencies
+
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-        // This dependency is used to enable more expressive tests
+
         testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
         testImplementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-test:2.15.0")
     }
@@ -132,5 +147,33 @@ subprojects {
         withType<Test> {
             useJUnitPlatform()
         }
+    }
+
+    applyToSubModules {
+        tasks.create(name = "deploy") {
+            dependsOn("build")
+            doLast {
+                ssh.run(delegateClosureOf<RunHandler> {
+                    session(server, delegateClosureOf<SessionHandler> {
+                        val name = project.name
+                        val file = "$projectDir\\build\\libs\\$name-${project.version}.jar"
+                        val directory = "/home/minecraft/${name.lowercase()}/plugins"
+
+                        put(
+                            hashMapOf(
+                                "from" to file,
+                                "into" to directory
+                            )
+                        )
+                    })
+                })
+            }
+        }
+    }
+}
+
+fun Project.applyToSubModules(action: () -> Unit) {
+    if(this.name != "Core") {
+        action()
     }
 }
