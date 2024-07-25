@@ -140,40 +140,40 @@ subprojects {
                 "apiVersion" to "1.20"
             )
             inputs.properties(properties)
-            filesMatching("plugin.yml") {
-                expand(properties)
-            }
         }
         withType<Test> {
             useJUnitPlatform()
         }
     }
+}
 
-    applyToSubModules {
-        tasks.create(name = "deploy") {
-            dependsOn("build")
-            doLast {
-                ssh.run(delegateClosureOf<RunHandler> {
-                    session(server, delegateClosureOf<SessionHandler> {
-                        val name = project.name
-                        val file = "$projectDir\\build\\libs\\$name-${project.version}.jar"
-                        val directory = "/home/minecraft/${name.lowercase()}/plugins"
+applyTo(
+    "Extensions",
+) {
+    tasks.create(name = "deploy") {
+        dependsOn("build")
+        doLast {
+            ssh.run(delegateClosureOf<RunHandler> {
+                session(server, delegateClosureOf<SessionHandler> {
+                    val file = "$projectDir\\build\\libs\\$name-${version}.jar"
+                    val directory = "/home/minecraft/${name.lowercase()}/plugins"
 
-                        put(
-                            hashMapOf(
-                                "from" to file,
-                                "into" to directory
-                            )
+                    put(
+                        hashMapOf(
+                            "from" to file,
+                            "into" to directory
                         )
-                    })
+                    )
                 })
-            }
+            })
         }
     }
 }
 
-fun Project.applyToSubModules(action: () -> Unit) {
-    if(this.name != "Core") {
-        action()
+fun Project.applyTo(vararg projects: String, action: Project.() -> Unit) {
+    projects.map {
+        project(":$it")
+    }.forEach { project ->
+        action.invoke(project)
     }
 }
