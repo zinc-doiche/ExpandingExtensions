@@ -1,8 +1,8 @@
-package zinc.doiche.service.user.entity.reward
+package zinc.doiche.service.item.entity.reward
 
 import jakarta.persistence.*
 import org.bukkit.entity.Player
-import zinc.doiche.service.user.entity.Post
+import zinc.doiche.service.user.entity.post.Post
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)

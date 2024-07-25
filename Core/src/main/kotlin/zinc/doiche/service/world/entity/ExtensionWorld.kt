@@ -16,9 +16,7 @@ class ExtensionWorld(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extensionWorld", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val accessLevels: MutableList<AccessLevel> = mutableListOf()
+//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extensionWorld", cascade = [CascadeType.ALL], orphanRemoval = true)
+//    val accessLevels: MutableList<AccessLevel> = mutableListOf()
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "extensionWorld", cascade = [CascadeType.ALL], orphanRemoval = true)
-    val userRegionAuthentications: MutableList<UserRegionAuthentication> = mutableListOf()
 }

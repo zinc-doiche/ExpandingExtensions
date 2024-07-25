@@ -12,7 +12,7 @@ interface GUIHolder: InventoryHolder {
 }
 
 interface ClickableHolder: GUIHolder {
-    fun onClick(inventoryEvent: InventoryEvent)
+    fun onClick(event: InventoryEvent)
 
     override fun onEvent(inventoryEvent: InventoryEvent, eventType: EventType) {
         if (eventType == EventType.CLICK) {

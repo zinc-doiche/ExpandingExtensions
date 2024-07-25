@@ -5,8 +5,8 @@ import zinc.doiche.lib.embeddable.Period
 import zinc.doiche.service.user.entity.User
 
 @Entity
-@Table(name = "TBL_USER_REGION_AUTHENTICATION")
-class UserRegionAuthentication(
+@Table(name = "TBL_USER_ACCESS_LEVEL_AUTHENTICATION")
+class UserAccessLevelAuthentication(
     @Embedded
     val period: Period
 ) {
@@ -14,11 +14,10 @@ class UserRegionAuthentication(
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_ID")
-    val user: User? = null
+//    @OneToOne(fetch = FetchType.LAZY, mappedBy = "userAccessLevelAuthentication")
+//    val user: User? = null
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EXTENSION_WORLD_ID")
-    val extensionWorld: ExtensionWorld? = null
+    @JoinColumn(name = "ACCESS_LEVEL_ID")
+    val accessLevel: AccessLevel? = null
 }

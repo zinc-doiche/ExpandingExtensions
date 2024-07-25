@@ -1,4 +1,4 @@
-package zinc.doiche.service.user.entity
+package zinc.doiche.service.user.entity.post
 
 import jakarta.persistence.*
 import org.bukkit.Material

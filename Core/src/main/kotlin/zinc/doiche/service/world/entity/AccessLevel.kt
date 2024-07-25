@@ -20,6 +20,6 @@ class AccessLevel(
     @JoinColumn(name = "EXTENSION_WORLD_ID")
     val extensionWorld: ExtensionWorld? = null
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val regions: MutableList<Region> = mutableListOf()
+//    @OneToMany(fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+//    val regions: MutableList<Region> = mutableListOf()
 }

@@ -17,4 +17,8 @@ class Region(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
+
+    @ManyToOne
+    @JoinColumn(name = "ACCESS_LEVEL_ID")
+    val accessLevel: AccessLevel? = null
 }

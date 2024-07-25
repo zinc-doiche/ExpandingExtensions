@@ -1,6 +1,7 @@
-package zinc.doiche.service.user.entity
+package zinc.doiche.service.user.entity.post
 
 import jakarta.persistence.*
+import zinc.doiche.service.user.entity.User
 import java.time.LocalDate
 
 @Entity

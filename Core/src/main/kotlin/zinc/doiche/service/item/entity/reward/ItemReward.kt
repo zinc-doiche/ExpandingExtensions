@@ -1,4 +1,4 @@
-package zinc.doiche.service.user.entity.reward
+package zinc.doiche.service.item.entity.reward
 
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 import zinc.doiche.lib.Translatable
 import zinc.doiche.lib.TranslationRegistry
 import zinc.doiche.service.item.entity.ItemData
-import zinc.doiche.service.user.entity.Post
+import zinc.doiche.service.user.entity.post.Post
 import zinc.doiche.util.LoggerUtil.prefixed
 
 @Entity

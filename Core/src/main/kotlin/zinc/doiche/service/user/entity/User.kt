@@ -1,16 +1,10 @@
 package zinc.doiche.service.user.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import jakarta.persistence.Transient
+import jakarta.persistence.*
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import zinc.doiche.lib.embeddable.Period
+import zinc.doiche.service.world.entity.UserAccessLevelAuthentication
 import java.util.*
 
 @Entity
@@ -28,6 +22,10 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ACCESS_LEVEL_AUTHENTICATION_ID")
+    val userAccessLevelAuthentication: UserAccessLevelAuthentication? = null
 
     @get:Transient
     val player: Player?

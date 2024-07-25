@@ -16,7 +16,6 @@ plugins {
     kotlin("plugin.noarg") version kotlinVersion apply false
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("io.papermc.paperweight.userdev") version "1.7.1" apply false
-    id("co.uzzu.dotenv.gradle") version "4.0.0" apply true
     id("org.hidetake.ssh") version "2.11.2" apply true
 }
 
@@ -85,9 +84,9 @@ subprojects {
             implementation(project(":Core", "runtimeElements"))
         }
 
-        paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
-        implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.15.0")
-        implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.15.0")
+        paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
+        compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.18.0")
+        compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.18.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
         implementation(kotlin("reflect"))
         implementation("org.reflections:reflections:0.9.12")
