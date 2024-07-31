@@ -6,7 +6,6 @@ import org.bukkit.event.inventory.InventoryEvent
 import org.bukkit.inventory.Inventory
 import zinc.doiche.service.gui.GUIService
 import zinc.doiche.service.gui.entity.GUI
-import zinc.doiche.service.gui.entity.GUI.Companion.openGUI
 import zinc.doiche.service.gui.`object`.EventType
 import zinc.doiche.service.gui.`object`.GUIHolder
 
@@ -24,7 +23,7 @@ class SeasonMenuGUI : GUIHolder {
 
     override fun open(player: Player) {
         gui?.let {
-            player.openGUI(it, inventory)
+           // player.openGUI(it, inventory)
         }
     }
 

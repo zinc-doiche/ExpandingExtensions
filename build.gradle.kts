@@ -19,16 +19,6 @@ plugins {
     id("org.hidetake.ssh") version "2.11.2" apply true
 }
 
-val server = Remote(
-    mapOf<String, Any>(
-        "host" to project.property("host") as String,
-        "port" to (project.property("port") as String).toInt(),
-        "user" to project.property("user") as String,
-        "password" to project.property("password") as String,
-        "knownHosts" to AllowAnyHosts.instance
-    )
-)
-
 subprojects {
     apply {
         plugin("kotlin")
@@ -38,6 +28,7 @@ subprojects {
         plugin("org.jetbrains.kotlin.plugin.allopen")
         plugin("org.jetbrains.kotlin.plugin.noarg")
         plugin("io.papermc.paperweight.userdev")
+        plugin("org.hidetake.ssh")
     }
 
     group = "zinc.doiche"
@@ -149,12 +140,22 @@ subprojects {
 applyTo(
     "Extensions",
 ) {
+    val server = Remote(
+        mapOf<String, Any>(
+            "host" to project.property("host") as String,
+            "port" to (project.property("port") as String).toInt(),
+            "user" to project.property("user") as String,
+            "password" to project.property("password") as String,
+            "knownHosts" to AllowAnyHosts.instance
+        )
+    )
+
     tasks.create(name = "deploy") {
         dependsOn("build")
         doLast {
             ssh.run(delegateClosureOf<RunHandler> {
                 session(server, delegateClosureOf<SessionHandler> {
-                    val file = "$projectDir\\build\\libs\\$name-${version}.jar"
+                    val file = "$projectDir/build/libs/${project.name}-${project.version}.jar"
                     val directory = "/home/minecraft/${name.lowercase()}/plugins"
 
                     put(
