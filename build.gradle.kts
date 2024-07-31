@@ -1,3 +1,4 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
@@ -17,6 +18,7 @@ plugins {
     id("org.jetbrains.kotlin.jvm") version kotlinVersion apply false
     id("io.papermc.paperweight.userdev") version "1.7.1" apply false
     id("org.hidetake.ssh") version "2.11.2" apply true
+    id("com.github.johnrengelman.shadow") version "8.1.1" apply true
 }
 
 subprojects {
@@ -29,6 +31,7 @@ subprojects {
         plugin("org.jetbrains.kotlin.plugin.noarg")
         plugin("io.papermc.paperweight.userdev")
         plugin("org.hidetake.ssh")
+        plugin("com.github.johnrengelman.shadow")
     }
 
     group = "zinc.doiche"
@@ -43,24 +46,18 @@ subprojects {
         }
     }
 
-    extensions.getByType(AllOpenExtension::class).apply {
-        annotation("jakarta.persistence.Entity")
-        annotation("jakarta.persistence.Embeddable")
-        annotation("jakarta.persistence.MappedSuperclass")
-    }
-
-    configurations {
-        named("implementation") {
-            isCanBeResolved = true
+    with(extensions) {
+        configure(AllOpenExtension::class) {
+            annotation("jakarta.persistence.Entity")
+            annotation("jakarta.persistence.Embeddable")
+            annotation("jakarta.persistence.MappedSuperclass")
         }
-    }
-
-    extensions.getByType(PaperweightUserExtension::class).apply {
-        reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
-    }
-
-    extensions.getByType(JavaPluginExtension::class).apply {
-        toolchain.languageVersion = JavaLanguageVersion.of(21)
+        configure(PaperweightUserExtension::class) {
+            reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
+        }
+        configure(JavaPluginExtension::class) {
+            toolchain.languageVersion = JavaLanguageVersion.of(21)
+        }
     }
 
     dependencies {
@@ -71,31 +68,28 @@ subprojects {
         val kapt by configurations
         val paperweight = extensions.getByType(PaperweightUserDependenciesExtension::class)
 
-        if(project.name != "Core") {
-            implementation(project(":Core", "runtimeElements"))
-        }
-
         paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
-        compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.18.0")
-        compileOnly("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.18.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-        implementation(kotlin("reflect"))
-        implementation("org.reflections:reflections:0.9.12")
-        compileOnly("com.google.code.gson:gson:2.10.1")
-        implementation("org.postgresql:postgresql:42.7.3")
-        implementation("redis.clients:jedis:5.1.2")
 
+//        Coroutines ==========================================================================
+        implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.18.0")
+        implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.18.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+
+//        Reflections ==========================================================================
+        compileOnly(kotlin("reflect"))
+        implementation("org.reflections:reflections:0.9.12")
+
+//        Database ==========================================================================
+        compileOnly("com.google.code.gson:gson:2.10.1")
+        implementation("redis.clients:jedis:5.1.2")
+        implementation("org.postgresql:postgresql:42.7.3")
         implementation("org.hibernate:hibernate-core:6.5.0.Final") {
             exclude(group = "cglib", module = "cglib")
             exclude(group = "asm", module = "asm")
         }
-//        implementation("org.hibernate.validator:hibernate-validator:8.0.1.Final") {
-//            exclude(group = "org.slf4j", module = "slf4j-api")
-//        }
         implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
         implementation("org.ehcache:ehcache:3.10.0")
         implementation("com.zaxxer:HikariCP:5.1.0")
-
         implementation("com.querydsl:querydsl-core:5.0.0")
         implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
         implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
@@ -107,6 +101,7 @@ subprojects {
         implementation("com.fasterxml.jackson.core:jackson-core:2.16.2")
         implementation("com.fasterxml.jackson.core:jackson-databind:2.16.2")
 
+//        Test ==========================================================================
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
@@ -115,6 +110,13 @@ subprojects {
     }
 
     tasks {
+        withType<ShadowJar> {
+//            exclude(
+//                "com/github/shynixn/mccoroutine/**",
+//                "kotlin/coroutines/**"
+//            )
+            //archiveFileName.set("desired-name.jar")
+        }
         withType<JavaCompile> {
             options.encoding = "UTF-8"
         }
@@ -151,12 +153,14 @@ applyTo(
     )
 
     tasks.create(name = "deploy") {
-        dependsOn("build")
+
+        dependsOn("shadowJar")
+
         doLast {
             ssh.run(delegateClosureOf<RunHandler> {
                 session(server, delegateClosureOf<SessionHandler> {
-                    val file = "$projectDir/build/libs/${project.name}-${project.version}.jar"
-                    val directory = "/home/minecraft/${name.lowercase()}/plugins"
+                    val file = "$projectDir/build/libs/${project.name}-${project.version}-all.jar"
+                    val directory = "/home/minecraft/${project.name}/plugins"
 
                     put(
                         hashMapOf(

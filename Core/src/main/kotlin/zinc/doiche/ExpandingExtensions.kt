@@ -1,7 +1,6 @@
 package zinc.doiche
 
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
-import com.github.shynixn.mccoroutine.bukkit.SuspendingPlugin
 import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.querydsl.jpa.impl.JPAQueryFactory
 import jakarta.persistence.EntityManager
@@ -16,6 +15,7 @@ import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.service.Service
 import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.append
+import zinc.doiche.web.Server
 import java.io.File
 
 open class ExpandingExtensions: SuspendingJavaPlugin() {
@@ -41,9 +41,14 @@ open class ExpandingExtensions: SuspendingJavaPlugin() {
 
     override suspend fun onLoadAsync() {
         initPluginInst(this)
+
         LoggerUtil.init(slF4JLogger)
+
         DatabaseFactoryProvider.create()
         initJedisPooled()
+
+        Server().runServer()
+
         processAll()
         loadServices()
     }
