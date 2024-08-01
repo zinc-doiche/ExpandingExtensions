@@ -15,17 +15,19 @@ import zinc.doiche.lib.init.ProcessorFactory
 import zinc.doiche.service.Service
 import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.append
-import zinc.doiche.web.Server
+import zinc.doiche.socket.SocketLinked
+import zinc.doiche.socket.SocketManagerFactory
+import zinc.doiche.socket.SocketManger
 import java.io.File
 
-open class ExpandingExtensions: SuspendingJavaPlugin() {
+abstract class ExpandingExtensions: SuspendingJavaPlugin(), SocketLinked {
     companion object {
         lateinit var plugin: ExpandingExtensions
             private set
     }
 
     val entityManager: EntityManager by lazy {
-        val factory = DatabaseFactoryProvider.get() ?: throw IllegalStateException("factory is null")
+        val factory = DatabaseFactoryProvider.create() ?: throw IllegalStateException("factory is null")
         factory.createEntityManager()
     }
 
@@ -37,17 +39,20 @@ open class ExpandingExtensions: SuspendingJavaPlugin() {
         JPAQueryFactory(entityManager)
     }
 
+    override val socketManager: SocketManger by lazy {
+        val factory = SocketManagerFactory()
+        factory.create()
+    }
+
     private val services: MutableList<Service> = mutableListOf()
 
     override suspend fun onLoadAsync() {
         initPluginInst(this)
 
         LoggerUtil.init(slF4JLogger)
-
-        DatabaseFactoryProvider.create()
+        //initEntityManager()
         initJedisPooled()
-
-        Server().runServer()
+        openSocket()
 
         processAll()
         loadServices()
@@ -60,7 +65,9 @@ open class ExpandingExtensions: SuspendingJavaPlugin() {
 
     override suspend fun onDisableAsync() {
         unloadServices()
+        socketManager.close()
         jedisPooled.close()
+        entityManager.close()
         DatabaseFactoryProvider.close()
     }
 
@@ -101,8 +108,18 @@ open class ExpandingExtensions: SuspendingJavaPlugin() {
         ExpandingExtensions.plugin = plugin
     }
 
+    private fun initEntityManager() {
+        if(entityManager.isOpen) {
+            slF4JLogger.info("EntityManager Open")
+        }
+    }
+
     private fun initJedisPooled() {
         jedisPooled.ping()
+    }
+
+    private suspend fun openSocket() {
+        socketManager.connect()
     }
 
     private fun loadServices() {

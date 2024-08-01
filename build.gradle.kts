@@ -1,4 +1,3 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import io.papermc.paperweight.userdev.PaperweightUserDependenciesExtension
 import io.papermc.paperweight.userdev.PaperweightUserExtension
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
@@ -110,13 +109,6 @@ subprojects {
     }
 
     tasks {
-        withType<ShadowJar> {
-//            exclude(
-//                "com/github/shynixn/mccoroutine/**",
-//                "kotlin/coroutines/**"
-//            )
-            //archiveFileName.set("desired-name.jar")
-        }
         withType<JavaCompile> {
             options.encoding = "UTF-8"
         }

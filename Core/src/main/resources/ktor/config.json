@@ -1,4 +1,10 @@
 {
-  "host": "localhost",
-  "port": 10021
+  "name": "extensions",
+  "servers": {
+    "extensions": {
+      "name": "extensions",
+      "port": 1080,
+      "host": "localhost"
+    }
+  }
 }

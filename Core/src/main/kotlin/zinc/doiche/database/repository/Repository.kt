@@ -15,7 +15,7 @@ abstract class Repository<E> {
         try {
             ExpandingExtensions.plugin.entityManager
         } catch (e: Exception) {
-            DatabaseFactoryProvider.get()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
+            DatabaseFactoryProvider.create()?.createEntityManager() ?: throw IllegalStateException("entity manager is null")
         }
     }
 

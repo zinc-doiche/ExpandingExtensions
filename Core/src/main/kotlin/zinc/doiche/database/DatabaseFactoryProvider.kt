@@ -21,8 +21,6 @@ object DatabaseFactoryProvider {
     val isInit: Boolean
         get() = entityManagerFactory != null
 
-    fun get() = entityManagerFactory
-
     fun close() {
         entityManagerFactory?.let {
             if(it.isOpen) {
@@ -31,14 +29,18 @@ object DatabaseFactoryProvider {
         }
     }
 
-    fun create() {
-        if(entityManagerFactory != null) {
-            return
+    fun create(): EntityManagerFactory? {
+        if (isInit) {
+            return entityManagerFactory
         }
+
         val connectionConfig = plugin.config(CONNECTION_CONFIG_PATH).toObject(ConnectionConfig::class.java)
         val hikariConfig = plugin.config(HIKARI_CONFIG_PATH).toObject(HikariConfiguration::class.java)
         val hibernateConfig = plugin.config(HIBERNATE_CONFIG_PATH).toObject(HibernateConfig::class.java)
-        initEntityManagerFactory(connectionConfig, hikariConfig, hibernateConfig)
+
+        entityManagerFactory = initEntityManagerFactory(connectionConfig, hikariConfig, hibernateConfig)
+
+        return entityManagerFactory
     }
 
     fun initEntityManagerFactory(
