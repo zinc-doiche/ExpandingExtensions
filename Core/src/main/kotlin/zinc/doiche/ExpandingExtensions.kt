@@ -50,7 +50,7 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin(), SocketLinked {
         initPluginInst(this)
 
         LoggerUtil.init(slF4JLogger)
-        //initEntityManager()
+        initEntityManager()
         initJedisPooled()
         openSocket()
 

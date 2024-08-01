@@ -1,8 +1,6 @@
 package zinc.doiche.util
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.slf4j.Logger
 import zinc.doiche.ExpandingExtensions.Companion.plugin
@@ -11,8 +9,8 @@ import zinc.doiche.lib.TranslationRegistry
 
 @TranslationRegistry
 object LoggerUtil {
-    @Translatable("log.prefix", defaultValue = ["[ <aqua>ExpExt</aqua> ]: "])
     @JvmStatic
+    @Translatable("log.prefix", defaultValue = ["<brace> <aqua>ExpExt</aqua> </brace>: "])
     private lateinit var prefix: Component //= text("[ ").append(text("ExpExt", NamedTextColor.AQUA)).append(" ]: ")
 
     lateinit var logger: Logger

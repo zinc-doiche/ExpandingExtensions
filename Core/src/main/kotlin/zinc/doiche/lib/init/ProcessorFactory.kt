@@ -9,8 +9,6 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.Bukkit
-import org.bukkit.command.Command
 import org.bukkit.event.Listener
 import org.reflections.Reflections
 import zinc.doiche.ExpandingExtensions.Companion.plugin
@@ -162,34 +160,53 @@ interface ProcessorFactory<T> {
             }
             .create()
 
-        fun translatable() = factory<Array<File>?>()
+        fun translatable() = factory<Array<File>>()
             .preProcess {
                 File(plugin.dataFolder, "translation").let { folder ->
                     if(!folder.exists()) {
                         folder.mkdirs()
                     }
-                    folder.listFiles()
+                    folder.listFiles() ?: emptyArray()
                 }
             }
             .process { reflections, files ->
                 val miniMessage = MiniMessage.miniMessage()
+
                 reflections.getTypesAnnotatedWith(TranslationRegistry::class.java).forEach { clazz ->
                     // find ?: create
-                    val file = files?.find {
+                    val file = files!!.find {
                         it.name.contains(clazz.simpleName)
                     } ?: run {
-                        val path = if(clazz.packageName.contains("service")) {
+                        val path = "/translation/" + if(clazz.packageName.contains("service")) {
                             clazz.packageName.substringAfterLast("service.")
-                                .replace('.', '\\')
-                                .replace("\\class", ".json")
-                        } else clazz.simpleName.replace("class", "json")
+                                .replace('.', '/')
+                        } else {
+                            clazz.simpleName
+                        }
 
-                        File(plugin.dataFolder, path).apply {
-                            createNewFile()
+                        File(plugin.dataFolder, "$path.json").apply {
+                            if(!exists()) {
+                                if(parentFile?.exists() != true) {
+                                    parentFile?.mkdirs() ?: File(plugin.dataFolder, path).mkdirs()
+                                }
+
+                                clazz.declaredFields.filter {
+                                    it.isAnnotationPresent(Translatable::class.java)
+                                }.associate {
+                                    it.getAnnotation(Translatable::class.java).let { translatable ->
+                                        translatable.key to translatable.defaultValue
+                                    }
+                                }.let {
+                                    plugin.slF4JLogger.info("[ Translation ] Creating new translation file: $path.json")
+                                    createNewFile()
+                                    writeJson(it)
+                                }
+                            }
                         }
                     }
 
-                    val map = file.toMapOf(String::class.java, Any::class.java).toMutableMap()
+                    val map = file.toMapOf(String::class.java, String::class.java.arrayType())
+                        .toMutableMap() as MutableMap<String, Array<String>>
                     val newKeys = mutableSetOf<String>()
                     val keys = mutableSetOf<String>()
 
@@ -200,14 +217,18 @@ interface ProcessorFactory<T> {
                             val translatable = field.getAnnotation(Translatable::class.java)
                             val key = translatable.key
 
-                            @Suppress("UNCHECKED_CAST")
-                            val value = (map[key]?.apply {
+                            if(key in map) {
                                 keys.add(key)
-                            } ?: run {
+                            } else {
                                 map[key] = translatable.defaultValue
                                 newKeys.add(key)
-                                translatable.defaultValue
-                            }) as Array<String>
+                            }
+                            val value = map[key]!!.map { string ->
+                                string.replace("<brace>", "[")
+                                    .replace("</brace>", "]")
+                                    .replace("<curlyBrace>", "{")
+                                    .replace("</curlyBrace>", "}")
+                            }
 
                             field.isAccessible = true
 
