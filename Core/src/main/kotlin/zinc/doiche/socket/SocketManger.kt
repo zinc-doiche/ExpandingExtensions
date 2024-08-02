@@ -10,11 +10,9 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.AsyncPlayerChatEvent
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.executesPlayer
 import zinc.doiche.lib.launchAsync
@@ -48,9 +46,8 @@ class SocketManger(
                     try {
                         while (true) {
                             Bukkit.broadcast(text("[Server] Waiting read..."))
-                            val name = receiveChannel.readUTF8Line()
-                            receiveChannel.discard(receiveChannel.totalBytesRead)
-                            sendChannel.writeStringUtf8("Hello, $name!\n")
+                            val message = receiveChannel.readUTF8Line()
+                            sendChannel.writeStringUtf8("Your message: $message\n")
                             Bukkit.broadcast(text("[Server] read end!"))
                         }
                     } catch (e: Throwable) {
@@ -76,9 +73,9 @@ class SocketManger(
                         receiveChannel = socket.openReadChannel()
                         sendChannel = socket.openWriteChannel(autoFlush = true)
 
-                        val message = receiveChannel.readUTF8Line()
+                        val message = receiveChannel.readUTF8Line() ?: "No message"
 
-                        player.sendMessage(message ?: "No message")
+                        player.sendMessage(message)
                     }
                     Command.SINGLE_SUCCESS
                 }
@@ -94,20 +91,15 @@ class SocketManger(
 
                 plugin.launchAsync {
                     launch(Dispatchers.IO) {
-                        if(receiveChannel.isClosedForRead) {
-                            Bukkit.broadcast(text("[Client] Channel is closed for read"))
-                            return@launch
-                        }
+                        Bukkit.broadcast(text("[Client] Wait Writing..."))
+                        sendChannel.writeStringUtf8("${message.content()}\n")
+                        Bukkit.broadcast(text("[Client] writing end!"))
+
                         Bukkit.broadcast(text("[Client] Wait Reading..."))
-                        val greeting = receiveChannel.readUTF8Line()
-                        receiveChannel.discard(receiveChannel.totalBytesRead)
-                        Bukkit.broadcast(text("[Client] Received!"))
-                        if (greeting != null) {
-                            player.sendMessage(greeting)
-                            Bukkit.broadcast(text("[Client] Wait Writing..."))
-                            sendChannel.writeStringUtf8("${message.content()}\n")
-                            Bukkit.broadcast(text("[Client] read end!"))
-                        }
+                        val response = receiveChannel.readUTF8Line() ?: "no response"
+                        Bukkit.broadcast(text("[Client] read end!"))
+
+                        player.sendMessage(text(response))
                     }
                 }
             }
