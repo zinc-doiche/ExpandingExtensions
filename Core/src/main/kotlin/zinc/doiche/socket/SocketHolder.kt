@@ -2,19 +2,21 @@ package zinc.doiche.socket
 
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import net.kyori.adventure.text.Component.text
+import org.bukkit.Bukkit
 
-interface SocketHolder {
-    val socket: ABoundSocket
-    var readChannel: ByteReadChannel
-    var writeChannel: ByteWriteChannel
+abstract class SocketHolder {
+    abstract val socket: ABoundSocket
 
-    suspend fun init()
+    lateinit var readChannel: ByteReadChannel
+        protected set
+    lateinit var writeChannel: ByteWriteChannel
+        protected set
 
-    suspend fun send() {
-        writeChannel.writeStringUtf8("Hello World!")
-    }
+    abstract suspend fun connect()
+    abstract suspend fun send()
 
-    suspend fun close() {
+    open suspend fun close() {
         readChannel.cancel()
         writeChannel.close()
     }
@@ -22,14 +24,26 @@ interface SocketHolder {
 
 class ServerSocketHolder(
     override val socket: ServerSocket
-) : SocketHolder {
-    override lateinit var readChannel: ByteReadChannel
-    override lateinit var writeChannel: ByteWriteChannel
+) : SocketHolder() {
+    override suspend fun connect() {
+        while (true) {
+            Bukkit.broadcast(text("[Server] Wait accepting..."))
+            val acceptedSocket = socket.accept()
+            Bukkit.broadcast(text("[Server] Accepted!"))
+            readChannel = acceptedSocket.openReadChannel()
+            writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
-    override suspend fun init() {
-        val socket = socket.accept()
-        readChannel = socket.openReadChannel()
-        writeChannel = socket.openWriteChannel(autoFlush = true)
+            while (true) {
+                Bukkit.broadcast(text("[Server] Waiting read..."))
+                val message = readChannel.readUTF8Line()
+                writeChannel.writeStringUtf8("Your message: $message\n")
+                Bukkit.broadcast(text("[Server] read end!"))
+            }
+        }
+    }
+
+    override suspend fun send() {
+        TODO("Not yet implemented")
     }
 
     override suspend fun close() {
@@ -40,13 +54,14 @@ class ServerSocketHolder(
 
 class ClientSocketHolder(
     override val socket: Socket
-) : SocketHolder {
-    override lateinit var readChannel: ByteReadChannel
-    override lateinit var writeChannel: ByteWriteChannel
-
-    override suspend fun init() {
+) : SocketHolder() {
+    override suspend fun connect() {
         readChannel = socket.openReadChannel()
         writeChannel = socket.openWriteChannel(autoFlush = true)
+    }
+
+    override suspend fun send() {
+        TODO("Not yet implemented")
     }
 
     override suspend fun close() {
