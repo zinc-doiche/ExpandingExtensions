@@ -9,6 +9,7 @@ import org.hibernate.cfg.Configuration
 import org.hibernate.service.ServiceRegistry
 import org.reflections.Reflections
 import zinc.doiche.ExpandingExtensions.Companion.plugin
+import zinc.doiche.util.LoggerUtil
 import zinc.doiche.util.toObject
 
 object DatabaseFactoryProvider {
@@ -22,6 +23,7 @@ object DatabaseFactoryProvider {
         get() = entityManagerFactory != null
 
     fun close() {
+        LoggerUtil.logger.info("Closing EntityManagerFactory")
         entityManagerFactory?.let {
             if(it.isOpen) {
                 it.close()

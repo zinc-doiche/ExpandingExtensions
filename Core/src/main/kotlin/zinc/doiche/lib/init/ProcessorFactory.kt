@@ -160,7 +160,7 @@ interface ProcessorFactory<T> {
             }
             .create()
 
-        fun translatable() = factory<Array<File>>()
+        fun translatable(replacer: (String) -> String) = factory<Array<File>>()
             .preProcess {
                 File(plugin.dataFolder, "translation").let { folder ->
                     if(!folder.exists()) {
@@ -179,10 +179,10 @@ interface ProcessorFactory<T> {
                     } ?: run {
                         val path = "/translation/" + if(clazz.packageName.contains("service")) {
                             clazz.packageName.substringAfterLast("service.")
-                                .replace('.', '/')
+                                .replace('.', '/') + "/"
                         } else {
-                            clazz.simpleName
-                        }
+                            ""
+                        } + clazz.simpleName
 
                         File(plugin.dataFolder, "$path.json").apply {
                             if(!exists()) {
@@ -194,7 +194,11 @@ interface ProcessorFactory<T> {
                                     it.isAnnotationPresent(Translatable::class.java)
                                 }.associate {
                                     it.getAnnotation(Translatable::class.java).let { translatable ->
-                                        translatable.key to translatable.defaultValue
+                                        val value = translatable.defaultValues.takeIf { array ->
+                                            array.isNotEmpty()
+                                        } ?: translatable.defaultValue
+
+                                        translatable.key to value
                                     }
                                 }.let {
                                     plugin.slF4JLogger.info("[ Translation ] Creating new translation file: $path.json")
@@ -205,8 +209,8 @@ interface ProcessorFactory<T> {
                         }
                     }
 
-                    val map = file.toMapOf(String::class.java, String::class.java.arrayType())
-                        .toMutableMap() as MutableMap<String, Array<String>>
+                    val map = file.toMapOf(String::class.java, Any::class.java)
+                        .toMutableMap()// as MutableMap<String, Any>
                     val newKeys = mutableSetOf<String>()
                     val keys = mutableSetOf<String>()
 
@@ -220,34 +224,46 @@ interface ProcessorFactory<T> {
                             if(key in map) {
                                 keys.add(key)
                             } else {
-                                map[key] = translatable.defaultValue
+                                map[key] = translatable.defaultValues.takeIf { array ->
+                                    array.isNotEmpty()
+                                } ?: translatable.defaultValue
                                 newKeys.add(key)
-                            }
-                            val value = map[key]!!.map { string ->
-                                string.replace("<brace>", "[")
-                                    .replace("</brace>", "]")
-                                    .replace("<curlyBrace>", "{")
-                                    .replace("</curlyBrace>", "}")
                             }
 
                             field.isAccessible = true
 
-                            when(type) {
-                                String::class.java -> {
-                                    field.set(null, value[0])
+                            map[key]?.let {
+                                when(it) {
+                                    is String -> replacer(it).let { string ->
+                                            when(type) {
+                                                String::class.java -> {
+                                                    field.set(null, string)
+                                                }
+                                                Component::class.java -> {
+                                                    val component = miniMessage.deserialize(string)
+                                                    field.set(null, component)
+                                                }
+                                                else -> null
+                                            }
+                                        }
+                                    else -> (it.takeIf { array ->
+                                            array.javaClass == String::class.java.arrayType()
+                                        } as? Array<*>)
+                                        ?.map { element -> replacer(element as String) }
+                                        ?.let { array ->
+                                            when(type) {
+                                                String::class.java.arrayType() -> {
+                                                    field.set(null, it)
+                                                }
+                                                Component::class.java.arrayType() -> {
+                                                    val components = array.map(miniMessage::deserialize)
+                                                    field.set(null, components.toTypedArray())
+                                                }
+                                                else -> null
+                                            }
+                                        }
                                 }
-                                String::class.java.arrayType() -> {
-                                    field.set(null, value)
-                                }
-                                Component::class.java -> {
-                                    val component = miniMessage.deserialize(value[0])
-                                    field.set(null, component)
-                                }
-                                Component::class.java.arrayType() -> {
-                                    val components = value.map { miniMessage.deserialize(it) }
-                                    field.set(null, components.toTypedArray())
-                                }
-                            }
+                            } ?: throw IllegalStateException("Invalid translation value: ${map[key]?.serialize()} in $map")
                         }
                     }
 

@@ -52,13 +52,14 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin(), SocketLinked {
         LoggerUtil.init(slF4JLogger)
         initEntityManager()
         initJedisPooled()
-        openSocket()
 
         processAll()
         loadServices()
     }
 
     override suspend fun onEnableAsync() {
+        openSocket()
+
         services.forEach(Service::onEnable)
         processListeners()
     }
@@ -92,7 +93,12 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin(), SocketLinked {
     private fun processAll() {
         ClassLoader()
             .add(ProcessorFactory.configuration())
-            .add(ProcessorFactory.translatable())
+            .add(ProcessorFactory.translatable {
+                it.replace("<brace>", "[")
+                    .replace("</brace>", "]")
+                    .replace("<curlyBrace>", "{")
+                    .replace("</curlyBrace>", "}")
+            })
             .add(ProcessorFactory.service())
             .add(ProcessorFactory.command())
             .process()

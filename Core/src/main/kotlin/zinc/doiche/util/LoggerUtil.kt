@@ -6,12 +6,13 @@ import org.slf4j.Logger
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.Translatable
 import zinc.doiche.lib.TranslationRegistry
+import zinc.doiche.service.item.entity.reward.ItemReward
 
 @TranslationRegistry
 object LoggerUtil {
-    @JvmStatic
-    @Translatable("log.prefix", defaultValue = ["<brace> <aqua>ExpExt</aqua> </brace>: "])
-    private lateinit var prefix: Component //= text("[ ").append(text("ExpExt", NamedTextColor.AQUA)).append(" ]: ")
+
+    @Translatable("log.prefix", defaultValue = "<brace> <aqua>ExpExt</aqua> </brace>: ")
+    private lateinit var prefix: Component
 
     lateinit var logger: Logger
         private set

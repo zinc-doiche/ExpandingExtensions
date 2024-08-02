@@ -14,4 +14,4 @@ internal fun <K, V> File.toMapOf(
     gson.fromJson(it, typeToken)
 } as? Map<K, V> ?: mutableMapOf()
 
-internal fun File.writeJson(obj: Any) = writer().use { gson.toJson(obj, it) }
+internal fun File.writeJson(obj: Any) = writer().use { writingGson.toJson(obj, it) }

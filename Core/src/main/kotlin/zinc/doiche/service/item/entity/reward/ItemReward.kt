@@ -9,6 +9,7 @@ import org.bukkit.entity.Player
 import zinc.doiche.lib.Translatable
 import zinc.doiche.lib.TranslationRegistry
 import zinc.doiche.service.item.entity.ItemData
+import zinc.doiche.service.item.entity.reward.ItemMessages.MESSAGE_INVENTORY_FULL
 import zinc.doiche.service.user.entity.post.Post
 import zinc.doiche.util.LoggerUtil.prefixed
 
@@ -24,12 +25,6 @@ class ItemReward(
     amount: Int = 1
 
 ): PostReward(post, amount) {
-
-    @TranslationRegistry
-    companion object {
-        @Translatable(key = "message.inventory.full", defaultValue = ["<red>인벤토리에 빈 공간이 부족해요."])
-        val MESSAGE_INVENTORY_FULL: Component = Component.empty()
-    }
 
     override fun giveReward(player: Player) {
         val inventory = player.inventory
@@ -47,4 +42,10 @@ class ItemReward(
             player.sendMessage(prefixed(MESSAGE_INVENTORY_FULL))
         }
     }
+}
+
+@TranslationRegistry
+object ItemMessages {
+    @Translatable(key = "message.inventory.full", defaultValue = "<red>인벤토리에 빈 공간이 부족해요.")
+    lateinit var MESSAGE_INVENTORY_FULL: Component
 }

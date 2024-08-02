@@ -15,6 +15,12 @@ internal val gson: Gson by lazyOf(GsonBuilder()
 //    .registerTypeAdapter(FreeString::class.java, FreeStringAdaptor())
     .create())
 
+internal val writingGson: Gson by lazyOf(GsonBuilder()
+    .setPrettyPrinting()
+    .disableHtmlEscaping()
+//    .registerTypeAdapter(FreeString::class.java, FreeStringAdaptor())
+    .create())
+
 internal fun Any.serialize() = gson.toJson(this)
 
 internal fun <T> String.deserialize(clazz: Class<T>) = gson.fromJson(this, clazz)

@@ -8,7 +8,7 @@ annotation class TranslationRegistry
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Translatable(val key: String, val defaultValue: Array<String> = [""])
+annotation class Translatable(val key: String, val defaultValue: String = "", val defaultValues: Array<String> = [])
 
 // ===== Command Registry
 
