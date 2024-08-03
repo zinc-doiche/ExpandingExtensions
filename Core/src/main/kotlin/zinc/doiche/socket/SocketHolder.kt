@@ -1,5 +1,6 @@
 package zinc.doiche.socket
 
+import com.google.common.collect.Multimaps
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +12,10 @@ import zinc.doiche.lib.launchAsync
 import zinc.doiche.socket.`object`.Message
 import zinc.doiche.socket.`object`.MessageListener
 import zinc.doiche.socket.`object`.ProtocolType
+import zinc.doiche.util.LoggerUtil
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.collections.HashMap
 
 abstract class SocketHolder(
     val manager: SocketManger
@@ -38,7 +42,10 @@ class ServerSocketHolder(
     lateinit var acceptedSocket: Socket
         private set
 
-    private val messageListeners = Multimaps. <ProtocolType, MessageListener>()
+    private val messageListeners = Multimaps.synchronizedListMultimap<ProtocolType, MessageListener>(
+        Multimaps.newListMultimap(
+            EnumMap(ProtocolType::class.java), { mutableListOf() }
+        ) )
 
     override suspend fun connect() {
 
@@ -55,19 +62,11 @@ class ServerSocketHolder(
     }
 
     suspend fun await() {
-        while (!socket.isClosed) {
-            Bukkit.broadcast(text("[Server] Wait accepting..."))
-            acceptedSocket = socket.accept()
-            Bukkit.broadcast(text("[Server] Accepted!"))
-            readChannel = acceptedSocket.openReadChannel()
-            writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
-        }
-        while (!acceptedSocket.isClosed) {
-            Bukkit.broadcast(text("[Server] Awaits for readLine..."))
-            val message = readChannel.readUTF8Line()
-            writeChannel.writeStringUtf8("Your message: $message\n")
-            Bukkit.broadcast(text("[Server] readLine done."))
-        }
+        LoggerUtil.prefixedInfo("[TCP Server] Wait accepting...")
+        acceptedSocket = socket.accept()
+        LoggerUtil.prefixedInfo("[Server] Accepted!")
+        readChannel = acceptedSocket.openReadChannel()
+        writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
     }
 }
 
