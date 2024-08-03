@@ -2,14 +2,8 @@ package zinc.doiche.socket;
 
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
-import io.ktor.utils.io.*
-import io.papermc.paper.event.player.AsyncChatEvent
 import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component.text
-import net.kyori.adventure.text.TextComponent
-import org.bukkit.Bukkit
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.launchAsync
 import zinc.doiche.util.LoggerUtil
@@ -21,64 +15,74 @@ class SocketManger(
 ) : Closeable {
     private val socketMap = mutableMapOf<String, SocketHolder>()
 
-    fun self() = socketMap[serverName]
-
     suspend fun connect() {
         plugin.launchAsync {
-            val selectorManager = SelectorManager(Dispatchers.IO)
-            val serverInfo = servers[serverName] ?: error("Server $serverName not found")
-            val serverSocket = aSocket(selectorManager).tcp().bind(serverInfo.address)
+            launch(Dispatchers.IO) {
+                val selectorManager = SelectorManager(Dispatchers.IO)
 
-            LoggerUtil.prefixedInfo("[TCP Server] Listening at: ${serverSocket.localAddress}")
-
-            ServerSocketHolder(serverSocket).let {
-                socketMap[serverName] = it
-                launch(Dispatchers.IO) {
-                    it.connect()
-                }
-            }
-
-            servers.forEach { (name, info) ->
-                if (name == serverName) {
-                    return@forEach
-                }
-                val socket = aSocket(selectorManager).tcp().connect(info.address)
-
-                LoggerUtil.prefixedInfo("[Client] Connected with: $name")
-
-                ClientSocketHolder(socket).let {
-                    socketMap[name] = it
+                servers.forEach { (name, info) ->
+                    if (name == serverName) {
+                        return@forEach
+                    }
                     launch(Dispatchers.IO) {
-                        it.connect()
+                        runCatching {
+                            aSocket(selectorManager)
+                                .tcpNoDelay()
+                                .tcp()
+                                .connect(info.address)
+                        }.onSuccess { socket ->
+                            val holder = ClientSocketHolder(socket, this@SocketManger)
+
+                            LoggerUtil.prefixedInfo("[TCP Client] Connected with: $name")
+
+                            socketMap[name] = holder
+                            holder.connect()
+                        }.onFailure {
+                            LoggerUtil.prefixedInfo(
+                                text("[TCP Client] Connection failed with: $name, Trying to binding...")
+                            )
+                            aSocket(selectorManager)
+                                .tcpNoDelay()
+                                .tcp()
+                                .bind(info.address)
+                                .let { serverSocket ->
+                                    val holder = ServerSocketHolder(serverSocket, this@SocketManger)
+
+                                    LoggerUtil.prefixedInfo("[TCP Server] Listening at: ${serverSocket.localAddress}")
+
+                                    socketMap[name] = holder
+                                    holder.await()
+                                }
+                        }
                     }
                 }
             }
         }
-
-        lateinit var receiveChannel: ByteReadChannel
-        lateinit var sendChannel: ByteWriteChannel
-
-        plugin.server.pluginManager.registerEvents(object : Listener {
-            @EventHandler
-            fun onChat(event: AsyncChatEvent) {
-                val player = event.player
-                val message = event.message() as TextComponent
-
-                plugin.launchAsync {
-                    launch(Dispatchers.IO) {
-                        Bukkit.broadcast(text("[Client] Wait Writing..."))
-                        sendChannel.writeStringUtf8("${message.content()}\n")
-                        Bukkit.broadcast(text("[Client] writing end!"))
-
-                        Bukkit.broadcast(text("[Client] Wait Reading..."))
-                        val response = receiveChannel.readUTF8Line() ?: "no response"
-                        Bukkit.broadcast(text("[Client] read end!"))
-
-                        player.sendMessage(text(response))
-                    }
-                }
-            }
-        }, plugin)
+//
+//        lateinit var receiveChannel: ByteReadChannel
+//        lateinit var sendChannel: ByteWriteChannel
+//
+//        plugin.server.pluginManager.registerEvents(object : Listener {
+//            @EventHandler
+//            fun onChat(event: AsyncChatEvent) {
+//                val player = event.player
+//                val message = event.message() as TextComponent
+//
+//                plugin.launchAsync {
+//                    launch(Dispatchers.IO) {
+//                        Bukkit.broadcast(text("[Client] Wait Writing..."))
+//                        sendChannel.writeStringUtf8("${message.content()}\n")
+//                        Bukkit.broadcast(text("[Client] writing end!"))
+//
+//                        Bukkit.broadcast(text("[Client] Wait Reading..."))
+//                        val response = receiveChannel.readUTF8Line() ?: "no response"
+//                        Bukkit.broadcast(text("[Client] read end!"))
+//
+//                        player.sendMessage(text(response))
+//                    }
+//                }
+//            }
+//        }, plugin)
     }
 
     override fun close() {

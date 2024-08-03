@@ -2,10 +2,20 @@ package zinc.doiche.socket
 
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
+import zinc.doiche.ExpandingExtensions.Companion.plugin
+import zinc.doiche.lib.launchAsync
+import zinc.doiche.socket.`object`.Message
+import zinc.doiche.socket.`object`.MessageListener
+import zinc.doiche.socket.`object`.ProtocolType
+import java.util.concurrent.ConcurrentLinkedQueue
 
-abstract class SocketHolder {
+abstract class SocketHolder(
+    val manager: SocketManger
+) {
     abstract val socket: ABoundSocket
 
     lateinit var readChannel: ByteReadChannel
@@ -14,7 +24,6 @@ abstract class SocketHolder {
         protected set
 
     abstract suspend fun connect()
-    abstract suspend fun send()
 
     open suspend fun close() {
         readChannel.cancel()
@@ -23,30 +32,20 @@ abstract class SocketHolder {
 }
 
 class ServerSocketHolder(
-    override val socket: ServerSocket
-) : SocketHolder() {
+    override val socket: ServerSocket,
+    manager: SocketManger
+) : SocketHolder(manager) {
     lateinit var acceptedSocket: Socket
         private set
 
-    override suspend fun connect() {
-        while (!socket.isClosed) {
-            Bukkit.broadcast(text("[Server] Wait accepting..."))
-            acceptedSocket = socket.accept()
-            Bukkit.broadcast(text("[Server] Accepted!"))
-            readChannel = acceptedSocket.openReadChannel()
-            writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
+    private val messageListeners = Multimaps. <ProtocolType, MessageListener>()
 
-            while (!acceptedSocket.isClosed) {
-                Bukkit.broadcast(text("[Server] Waiting read..."))
-                val message = readChannel.readUTF8Line()
-                writeChannel.writeStringUtf8("Your message: $message\n")
-                Bukkit.broadcast(text("[Server] read end!"))
-            }
-        }
+    override suspend fun connect() {
+
     }
 
-    override suspend fun send() {
-        TODO("Not yet implemented")
+    fun addListener(listener: MessageListener) {
+
     }
 
     override suspend fun close() {
@@ -54,17 +53,46 @@ class ServerSocketHolder(
         acceptedSocket.close()
         socket.close()
     }
+
+    suspend fun await() {
+        while (!socket.isClosed) {
+            Bukkit.broadcast(text("[Server] Wait accepting..."))
+            acceptedSocket = socket.accept()
+            Bukkit.broadcast(text("[Server] Accepted!"))
+            readChannel = acceptedSocket.openReadChannel()
+            writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
+        }
+        while (!acceptedSocket.isClosed) {
+            Bukkit.broadcast(text("[Server] Awaits for readLine..."))
+            val message = readChannel.readUTF8Line()
+            writeChannel.writeStringUtf8("Your message: $message\n")
+            Bukkit.broadcast(text("[Server] readLine done."))
+        }
+    }
 }
 
 class ClientSocketHolder(
-    override val socket: Socket
-) : SocketHolder() {
+    override val socket: Socket,
+    manager: SocketManger
+) : SocketHolder(manager) {
+    @get:Synchronized
+    private val messageQueue: ConcurrentLinkedQueue<Message> = ConcurrentLinkedQueue()
+
     override suspend fun connect() {
         readChannel = socket.openReadChannel()
         writeChannel = socket.openWriteChannel(autoFlush = true)
+
+        writeChannel.writeStringUtf8("${manager.serverName}:greeting")
+
+        plugin.launchAsync {
+            launch(Dispatchers.IO) {
+
+            }
+        }
+
     }
 
-    override suspend fun send() {
+    suspend fun enqueue(message: Message) {
         TODO("Not yet implemented")
     }
 
