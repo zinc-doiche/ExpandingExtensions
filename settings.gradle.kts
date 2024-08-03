@@ -13,4 +13,5 @@ plugins {
 rootProject.name = "ExpandingExtensions"
 include("Extensions")
 include("Core")
-
+include("Proxy")
+include("Port")

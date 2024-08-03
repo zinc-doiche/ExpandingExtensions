@@ -12,6 +12,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Core" />
             <option value="$PROJECT_DIR$/Extensions" />
+            <option value="$PROJECT_DIR$/Port" />
+            <option value="$PROJECT_DIR$/Proxy" />
           </set>
         </option>
       </GradleProjectSettings>

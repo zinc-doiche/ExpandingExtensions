@@ -25,15 +25,18 @@ abstract class SocketHolder {
 class ServerSocketHolder(
     override val socket: ServerSocket
 ) : SocketHolder() {
+    lateinit var acceptedSocket: Socket
+        private set
+
     override suspend fun connect() {
-        while (true) {
+        while (!socket.isClosed) {
             Bukkit.broadcast(text("[Server] Wait accepting..."))
-            val acceptedSocket = socket.accept()
+            acceptedSocket = socket.accept()
             Bukkit.broadcast(text("[Server] Accepted!"))
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
-            while (true) {
+            while (!acceptedSocket.isClosed) {
                 Bukkit.broadcast(text("[Server] Waiting read..."))
                 val message = readChannel.readUTF8Line()
                 writeChannel.writeStringUtf8("Your message: $message\n")
@@ -48,6 +51,7 @@ class ServerSocketHolder(
 
     override suspend fun close() {
         super.close()
+        acceptedSocket.close()
         socket.close()
     }
 }
