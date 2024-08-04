@@ -3,31 +3,78 @@ package zinc.doiche.socket
 import com.google.common.collect.Multimaps
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
+import io.ktor.utils.io.errors.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import net.kyori.adventure.text.Component.text
-import org.bukkit.Bukkit
-import zinc.doiche.ExpandingExtensions.Companion.plugin
-import zinc.doiche.lib.launchAsync
-import zinc.doiche.socket.`object`.Message
-import zinc.doiche.socket.`object`.MessageListener
-import zinc.doiche.socket.`object`.ProtocolType
+import zinc.doiche.socket.context.ClientContextManager
+import zinc.doiche.socket.message.Message
+import zinc.doiche.socket.message.MessageListener
+import zinc.doiche.socket.message.MessageProtocol
+import zinc.doiche.socket.message.MessageType
 import zinc.doiche.util.LoggerUtil
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
-import kotlin.collections.HashMap
 
 abstract class SocketHolder(
     val manager: SocketManger
 ) {
-    abstract val socket: ABoundSocket
+    val clientContextManager: ClientContextManager = ClientContextManager(manager)
+
+    @get:Synchronized
+    protected val messageQueue: ConcurrentLinkedQueue<Message> = ConcurrentLinkedQueue()
+
+    protected val messageServerListeners = Multimaps
+        .newListMultimap<MessageProtocol, MessageListener>(
+            EnumMap(MessageProtocol::class.java),
+            ::mutableListOf
+        ).let {
+            Multimaps.synchronizedListMultimap(it)
+        }
 
     lateinit var readChannel: ByteReadChannel
         protected set
     lateinit var writeChannel: ByteWriteChannel
         protected set
 
-    abstract suspend fun connect()
+    fun addListener(listener: MessageListener) {
+        messageServerListeners.put(listener.messageProtocol, listener)
+    }
+
+    suspend fun enqueue(message: Message) {
+        messageQueue.add(message)
+    }
+
+    protected fun CoroutineScope.launchMessageHandlers(socket: Socket) {
+        // on send message
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                messageQueue.peek()?.let { message ->
+                    clientContextManager.bindRequest(message)
+                    writeChannel.writeStringUtf8(message.protocolize())
+                }
+            }
+        }
+        // on receive message
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                val line = readChannel.readUTF8Line() ?: continue
+
+                Message.parse(line)?.let { message ->
+                    when (message.messageType) {
+                        MessageType.RESPONSE -> {
+                            clientContextManager.handleResponse(message)
+                        }
+                        MessageType.REQUEST -> {
+                            messageServerListeners[message.messageProtocol].forEach { listener ->
+                                listener.onMessage(message)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     open suspend fun close() {
         readChannel.cancel()
@@ -36,23 +83,33 @@ abstract class SocketHolder(
 }
 
 class ServerSocketHolder(
-    override val socket: ServerSocket,
+    val socket: ServerSocket,
     manager: SocketManger
 ) : SocketHolder(manager) {
     lateinit var acceptedSocket: Socket
         private set
 
-    private val messageListeners = Multimaps.synchronizedListMultimap<ProtocolType, MessageListener>(
-        Multimaps.newListMultimap(
-            EnumMap(ProtocolType::class.java), { mutableListOf() }
-        ) )
+    suspend fun await(scope: CoroutineScope) {
+        with (scope) {
+            LoggerUtil.prefixedInfo("[TCP Server] Wait accepting...")
 
-    override suspend fun connect() {
+            acceptedSocket = socket.accept()
 
-    }
+            LoggerUtil.prefixedInfo("[TCP Server] Accepted!")
 
-    fun addListener(listener: MessageListener) {
+            readChannel = acceptedSocket.openReadChannel()
+            writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
+            readChannel.readUTF8Line()?.let {
+                Message.parse(it)?.let { message ->
+                    LoggerUtil.prefixedInfo(message.body)
+
+                    writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
+                }
+            } ?: throw IOException("클라이언트의 요청이 없습니다.")
+
+            launchMessageHandlers(acceptedSocket)
+        }
     }
 
     override suspend fun close() {
@@ -60,39 +117,28 @@ class ServerSocketHolder(
         acceptedSocket.close()
         socket.close()
     }
-
-    suspend fun await() {
-        LoggerUtil.prefixedInfo("[TCP Server] Wait accepting...")
-        acceptedSocket = socket.accept()
-        LoggerUtil.prefixedInfo("[Server] Accepted!")
-        readChannel = acceptedSocket.openReadChannel()
-        writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
-    }
 }
 
 class ClientSocketHolder(
-    override val socket: Socket,
+    val socket: Socket,
     manager: SocketManger
 ) : SocketHolder(manager) {
-    @get:Synchronized
-    private val messageQueue: ConcurrentLinkedQueue<Message> = ConcurrentLinkedQueue()
 
-    override suspend fun connect() {
-        readChannel = socket.openReadChannel()
-        writeChannel = socket.openWriteChannel(autoFlush = true)
+    suspend fun connect(scope: CoroutineScope) {
+        with (scope)  {
+            readChannel = socket.openReadChannel()
+            writeChannel = socket.openWriteChannel(autoFlush = true)
 
-        writeChannel.writeStringUtf8("${manager.serverName}:greeting")
+            writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
 
-        plugin.launchAsync {
-            launch(Dispatchers.IO) {
+            readChannel.readUTF8Line()?.let {
+                Message.parse(it)?.let { message ->
+                    LoggerUtil.prefixedInfo(message.body)
+                } ?: return@let null
+            } ?: throw IOException("서버의 응답이 없습니다.")
 
-            }
+            launchMessageHandlers(socket)
         }
-
-    }
-
-    suspend fun enqueue(message: Message) {
-        TODO("Not yet implemented")
     }
 
     override suspend fun close() {

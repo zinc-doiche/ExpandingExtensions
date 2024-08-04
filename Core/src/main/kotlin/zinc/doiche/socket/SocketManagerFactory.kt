@@ -11,7 +11,7 @@ class SocketManagerFactory {
     fun create(): SocketManger = plugin.config(CONFIG_PATH)
         .toObject(ServerConfig::class.java)
         .let {
-            SocketManger(it.name, it.servers)
+            SocketManger(it)
         }
 }
 
@@ -26,6 +26,7 @@ data class ServerInfo(
 
 data class ServerConfig(
     val name: String,
+    val responseTimeoutSeconds: Int,
     val servers: Map<String, ServerInfo>
 )
 

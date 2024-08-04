@@ -11,9 +11,16 @@ import java.io.Closeable
 
 class SocketManger(
     val serverName: String,
+    val responseTimeoutSeconds: Int,
     val servers: Map<String, ServerInfo>
 ) : Closeable {
     private val socketMap = mutableMapOf<String, SocketHolder>()
+
+    constructor(config: ServerConfig) : this(
+        config.name,
+        config.responseTimeoutSeconds,
+        config.servers
+    )
 
     suspend fun connect() {
         plugin.launchAsync {
@@ -36,7 +43,7 @@ class SocketManger(
                             LoggerUtil.prefixedInfo("[TCP Client] Connected with: $name")
 
                             socketMap[name] = holder
-                            holder.connect()
+                            holder.connect(this)
                         }.onFailure {
                             LoggerUtil.prefixedInfo(
                                 text("[TCP Client] Connection failed with: $name, Trying to binding...")
@@ -51,7 +58,7 @@ class SocketManger(
                                     LoggerUtil.prefixedInfo("[TCP Server] Listening at: ${serverSocket.localAddress}")
 
                                     socketMap[name] = holder
-                                    holder.await()
+                                    holder.await(this)
                                 }
                         }
                     }
