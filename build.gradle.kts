@@ -133,6 +133,8 @@ subprojects {
 
 applyTo(
     "Extensions",
+    "Port",
+    "Proxy"
 ) {
     val server = Remote(
         mapOf<String, Any>(
