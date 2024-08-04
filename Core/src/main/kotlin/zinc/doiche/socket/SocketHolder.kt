@@ -6,13 +6,14 @@ import io.ktor.utils.io.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.socket.context.ClientContextManager
 import zinc.doiche.socket.message.Message
 import zinc.doiche.socket.message.MessageListener
 import zinc.doiche.socket.message.MessageProtocol
 import zinc.doiche.socket.message.MessageType
-import zinc.doiche.util.LoggerUtil
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -45,29 +46,30 @@ abstract class SocketHolder(
         messageQueue.add(message)
     }
 
-    protected fun CoroutineScope.launchMessageHandlers(socket: Socket) {
-        // on send message
-        launch(Dispatchers.IO) {
-            while (!socket.isClosed) {
-                messageQueue.peek()?.let { message ->
-                    clientContextManager.bindRequest(message)
-                    writeChannel.writeStringUtf8(message.protocolize())
+    protected suspend fun launchMessageHandlers(socket: Socket) {
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                while (!socket.isClosed) {
+                    messageQueue.peek()?.let { message ->
+                        clientContextManager.bindRequest(message)
+                        writeChannel.writeStringUtf8(message.protocolize())
+                    }
                 }
             }
-        }
-        // on receive message
-        launch(Dispatchers.IO) {
-            while (!socket.isClosed) {
-                val line = readChannel.readUTF8Line() ?: continue
+            launch(Dispatchers.IO) {
+                while (!socket.isClosed) {
+                    val line = readChannel.readUTF8Line() ?: continue
 
-                Message.parse(line)?.let { message ->
-                    when (message.messageType) {
-                        MessageType.RESPONSE -> {
-                            clientContextManager.handleResponse(message)
-                        }
-                        MessageType.REQUEST -> {
-                            messageServerListeners[message.messageProtocol].forEach { listener ->
-                                listener.onMessage(message)
+                    Message.parse(line)?.let { message ->
+                        when (message.messageType) {
+                            MessageType.RESPONSE -> {
+                                clientContextManager.handleResponse(message)
+                            }
+
+                            MessageType.REQUEST -> {
+                                messageServerListeners[message.messageProtocol].forEach { listener ->
+                                    listener.onMessage(message)
+                                }
                             }
                         }
                     }
@@ -89,20 +91,20 @@ class ServerSocketHolder(
     lateinit var acceptedSocket: Socket
         private set
 
-    suspend fun await(scope: CoroutineScope) {
-        with (scope) {
-            LoggerUtil.prefixedInfo("[TCP Server] Wait accepting...")
+    suspend fun await() {
+        coroutineScope {
+            plugin.slF4JLogger.info("[TCP Server] Wait accepting...")
 
             acceptedSocket = socket.accept()
 
-            LoggerUtil.prefixedInfo("[TCP Server] Accepted!")
+            plugin.slF4JLogger.info("[TCP Server] Accepted!")
 
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
             readChannel.readUTF8Line()?.let {
                 Message.parse(it)?.let { message ->
-                    LoggerUtil.prefixedInfo(message.body)
+                    plugin.slF4JLogger.info(message.body)
 
                     writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
                 }
@@ -120,12 +122,15 @@ class ServerSocketHolder(
 }
 
 class ClientSocketHolder(
-    val socket: Socket,
+    socket: Socket,
     manager: SocketManger
 ) : SocketHolder(manager) {
+    var socket: Socket = socket
+        private set
 
-    suspend fun connect(scope: CoroutineScope) {
-        with (scope)  {
+    suspend fun connect() {
+        coroutineScope {
+//            while ()
             readChannel = socket.openReadChannel()
             writeChannel = socket.openWriteChannel(autoFlush = true)
 
@@ -133,7 +138,7 @@ class ClientSocketHolder(
 
             readChannel.readUTF8Line()?.let {
                 Message.parse(it)?.let { message ->
-                    LoggerUtil.prefixedInfo(message.body)
+                    plugin.slF4JLogger.info(message.body)
                 } ?: return@let null
             } ?: throw IOException("서버의 응답이 없습니다.")
 

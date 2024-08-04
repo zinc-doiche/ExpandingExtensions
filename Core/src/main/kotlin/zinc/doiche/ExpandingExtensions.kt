@@ -48,11 +48,9 @@ abstract class ExpandingExtensions: SuspendingJavaPlugin(), SocketLinked {
 
     override suspend fun onLoadAsync() {
         initPluginInst(this)
-
         LoggerUtil.init(slF4JLogger)
-        initEntityManager()
-        initJedisPooled()
-
+//        initEntityManager()
+//        initJedisPooled()
         processAll()
         loadServices()
     }
