@@ -41,7 +41,7 @@ class SocketManger(
                             plugin.slF4JLogger.info("[TCP Client] Connected with: $name")
 
                             socketMap[name] = holder
-                            holder.connect(this)
+                            holder.connect()
                         }.onFailure {
                             plugin.slF4JLogger.warn("[TCP Client] Connection failed with: $name, Trying to binding...")
                             aSocket(selectorManager)
@@ -54,7 +54,7 @@ class SocketManger(
                                     plugin.slF4JLogger.info("[TCP Server] Listening at: ${serverSocket.localAddress}")
 
                                     socketMap[name] = holder
-                                    holder.await(this)
+                                    holder.await()
                                 }
                         }
                     }
