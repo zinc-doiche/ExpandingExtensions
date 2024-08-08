@@ -3,11 +3,7 @@ package zinc.doiche.socket
 import com.google.common.collect.Multimaps
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.errors.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.socket.context.ClientContextManager
 import zinc.doiche.socket.message.Message
@@ -46,30 +42,28 @@ abstract class SocketHolder(
         messageQueue.add(message)
     }
 
-    protected suspend fun launchMessageHandlers(socket: Socket) {
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                while (!socket.isClosed) {
-                    messageQueue.peek()?.let { message ->
-                        clientContextManager.bindRequest(message)
-                        writeChannel.writeStringUtf8(message.protocolize())
-                    }
+    protected suspend fun launchMessageHandlers(socket: Socket) = coroutineScope {
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                messageQueue.peek()?.let { message ->
+                    clientContextManager.bindRequest(message)
+                    writeChannel.writeStringUtf8(message.protocolize())
                 }
             }
-            launch(Dispatchers.IO) {
-                while (!socket.isClosed) {
-                    val line = readChannel.readUTF8Line() ?: continue
+        }
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                val line = readChannel.readUTF8Line() ?: continue
 
-                    Message.parse(line)?.let { message ->
-                        when (message.messageType) {
-                            MessageType.RESPONSE -> {
-                                clientContextManager.handleResponse(message)
-                            }
+                Message.parse(line)?.let { message ->
+                    when (message.messageType) {
+                        MessageType.RESPONSE -> {
+                            clientContextManager.handleResponse(message)
+                        }
 
-                            MessageType.REQUEST -> {
-                                messageServerListeners[message.messageProtocol].forEach { listener ->
-                                    listener.onMessage(message)
-                                }
+                        MessageType.REQUEST -> {
+                            messageServerListeners[message.messageProtocol].forEach { listener ->
+                                listener.onMessage(message)
                             }
                         }
                     }
@@ -77,6 +71,9 @@ abstract class SocketHolder(
             }
         }
     }
+
+
+    abstract suspend fun onDisconnect(scope: CoroutineScope, job: Job?)
 
     open suspend fun close() {
         readChannel.cancel()
@@ -93,11 +90,13 @@ class ServerSocketHolder(
 
     suspend fun await() {
         coroutineScope {
-            plugin.slF4JLogger.info("[TCP Server] Wait accepting...")
+            var handlerJob: Job? = null
+
+            plugin.slF4JLogger.info("[TCP Server] 클라이언트의 연결 대기 중...")
 
             acceptedSocket = socket.accept()
 
-            plugin.slF4JLogger.info("[TCP Server] Accepted!")
+            plugin.slF4JLogger.info("[TCP Server] 연결되었습니다.")
 
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
@@ -108,9 +107,30 @@ class ServerSocketHolder(
 
                     writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
                 }
-            } ?: throw IOException("클라이언트의 요청이 없습니다.")
+            } ?: onDisconnect(this, handlerJob)
 
-            launchMessageHandlers(acceptedSocket)
+            handlerJob = launchMessageHandlers(acceptedSocket)
+        }
+    }
+
+    override suspend fun onDisconnect(scope: CoroutineScope, job: Job?) {
+        plugin.slF4JLogger.warn("[TCP Server] 클라이언트의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
+
+        super.close()
+        if(!acceptedSocket.isClosed) {
+            acceptedSocket.close()
+        }
+
+        job?.let {
+            if(it.isCompleted) {
+                await()
+            } else {
+                it.invokeOnCompletion {
+                    scope.launch(Dispatchers.IO) {
+                        await()
+                    }
+                }
+            }
         }
     }
 
@@ -130,7 +150,8 @@ class ClientSocketHolder(
 
     suspend fun connect() {
         coroutineScope {
-//            while ()
+            var handlerJob: Job? = null
+
             readChannel = socket.openReadChannel()
             writeChannel = socket.openWriteChannel(autoFlush = true)
 
@@ -140,9 +161,27 @@ class ClientSocketHolder(
                 Message.parse(it)?.let { message ->
                     plugin.slF4JLogger.info(message.body)
                 } ?: return@let null
-            } ?: throw IOException("서버의 응답이 없습니다.")
+            } ?: onDisconnect(this, handlerJob)
 
-            launchMessageHandlers(socket)
+            handlerJob = launchMessageHandlers(socket)
+        }
+    }
+
+    override suspend fun onDisconnect(scope: CoroutineScope, job: Job?) {
+        plugin.slF4JLogger.warn("[TCP Client] 서버의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
+
+        super.close()
+
+        job?.let {
+            if(it.isCompleted) {
+                connect()
+            } else {
+                it.invokeOnCompletion {
+                    scope.launch(Dispatchers.IO) {
+                        connect()
+                    }
+                }
+            }
         }
     }
 
