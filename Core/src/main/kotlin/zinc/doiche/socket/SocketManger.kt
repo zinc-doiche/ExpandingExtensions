@@ -3,17 +3,22 @@ package zinc.doiche.socket;
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import kotlinx.coroutines.*
-import net.kyori.adventure.text.Component.text
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.launchAsync
-import zinc.doiche.util.LoggerUtil
 import java.io.Closeable
 
 class SocketManger(
     val serverName: String,
+    val responseTimeoutSeconds: Int,
     val servers: Map<String, ServerInfo>
 ) : Closeable {
     private val socketMap = mutableMapOf<String, SocketHolder>()
+
+    constructor(config: ServerConfig) : this(
+        config.name,
+        config.responseTimeoutSeconds,
+        config.servers
+    )
 
     suspend fun connect() {
         plugin.launchAsync {
@@ -33,14 +38,12 @@ class SocketManger(
                         }.onSuccess { socket ->
                             val holder = ClientSocketHolder(socket, this@SocketManger)
 
-                            LoggerUtil.prefixedInfo("[TCP Client] Connected with: $name")
+                            plugin.slF4JLogger.info("[TCP Client] Connected with: $name")
 
                             socketMap[name] = holder
                             holder.connect()
                         }.onFailure {
-                            LoggerUtil.prefixedInfo(
-                                text("[TCP Client] Connection failed with: $name, Trying to binding...")
-                            )
+                            plugin.slF4JLogger.warn("[TCP Client] Connection failed with: $name, Trying to binding...")
                             aSocket(selectorManager)
                                 .tcpNoDelay()
                                 .tcp()
@@ -48,7 +51,7 @@ class SocketManger(
                                 .let { serverSocket ->
                                     val holder = ServerSocketHolder(serverSocket, this@SocketManger)
 
-                                    LoggerUtil.prefixedInfo("[TCP Server] Listening at: ${serverSocket.localAddress}")
+                                    plugin.slF4JLogger.info("[TCP Server] Listening at: ${serverSocket.localAddress}")
 
                                     socketMap[name] = holder
                                     holder.await()
