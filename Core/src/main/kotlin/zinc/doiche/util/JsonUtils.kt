@@ -32,35 +32,3 @@ internal fun String.asMapJava() = gson.fromJson(this, mapTypeOf(String::class.ja
 internal fun String.asMap() = gson.fromJson(this, mapTypeOf(String::class.java, JvmType.Object::class.java)) as MutableMap<String, Any>
 
 internal fun <K, V> mapTypeOf(key: Class<K>, value: Class<V>) = TypeToken.getParameterized(Map::class.java, key, value)
-
-data class FreeString(val content: String)
-
-class FreeStringAdaptor : TypeAdapter<FreeString>() {
-    override fun write(out: JsonWriter, value: FreeString) {
-        out.value(value.content)
-    }
-
-    override fun read(input: JsonReader) = FreeString(
-        buildString {
-            input.beginObject()
-            input.nextName()
-
-            var peek = input.peek()
-            while (peek != JsonToken.END_OBJECT) {
-                when (peek) {
-                    JsonToken.NAME -> append(input.nextName())
-                    JsonToken.STRING -> append(input.nextString())
-                    JsonToken.BEGIN_ARRAY -> append("[")
-                    JsonToken.END_ARRAY -> append("]")
-                    JsonToken.BEGIN_OBJECT -> append("{")
-                    JsonToken.NUMBER -> append(input.nextDouble())
-                    JsonToken.BOOLEAN -> append(input.nextBoolean())
-                    else -> input.skipValue()
-                }
-                peek = input.peek()
-            }
-
-            input.endObject()
-        }
-    )
-}

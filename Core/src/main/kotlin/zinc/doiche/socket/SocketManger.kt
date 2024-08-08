@@ -43,7 +43,7 @@ class SocketManger(
                             socketMap[name] = holder
                             holder.connect()
                         }.onFailure {
-                            plugin.slF4JLogger.warn("[TCP Client $name(와)과 연결하는 데 실패하였습니다. 호스트(Server)로서 바인딩합니다.")
+                            plugin.slF4JLogger.warn("[TCP Client] $name(와)과 연결하는 데 실패하였습니다. 호스트(Server)로서 바인딩합니다.")
                             aSocket(selectorManager)
                                 .tcpNoDelay()
                                 .tcp()
