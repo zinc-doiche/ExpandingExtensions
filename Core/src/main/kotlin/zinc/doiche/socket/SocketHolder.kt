@@ -99,7 +99,10 @@ class ServerSocketHolder(
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
+            plugin.slF4JLogger.info("[TCP Server] open")
+
             launch(Dispatchers.IO) {
+                plugin.slF4JLogger.info("[TCP Server] waiting reading.")
                 readChannel.readUTF8Line()?.let {
                     Message.parse(it)?.let { message ->
                         plugin.slF4JLogger.info(message.body)
@@ -151,7 +154,7 @@ class ClientSocketHolder(
             writeChannel = socket.openWriteChannel(autoFlush = true)
 
             writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
-
+            plugin.slF4JLogger.info("[TCP Server] Wait reading")
             readChannel.readUTF8Line()?.let {
                     Message.parse(it)?.let { message ->
                     plugin.slF4JLogger.info(message.body)
