@@ -1,11 +1,11 @@
-Vanila+ Rogue-like SMP
+Vanilla+ Rogue-like SMP
 
 # structure (WIP)
 
 |Lobby Server|Explore Servers(many)|Workspace Server(many)|
 |:-:|:-:|:-:|
 |workspace|extensions|workspace clusters|
-|lobby    |"         |"                 |
+|port    |"         |"                 |
 
 # Extension(world)
 
