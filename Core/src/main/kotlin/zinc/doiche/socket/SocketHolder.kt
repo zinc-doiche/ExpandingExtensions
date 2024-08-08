@@ -90,8 +90,6 @@ class ServerSocketHolder(
 
     suspend fun await() {
         coroutineScope {
-            var handlerJob: Job? = null
-
             plugin.slF4JLogger.info("[TCP Server] 클라이언트의 연결 대기 중...")
 
             acceptedSocket = socket.accept()
@@ -101,15 +99,17 @@ class ServerSocketHolder(
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
-            readChannel.readUTF8Line()?.let {
-                Message.parse(it)?.let { message ->
-                    plugin.slF4JLogger.info(message.body)
+            launch(Dispatchers.IO) {
+                readChannel.readUTF8Line()?.let {
+                    Message.parse(it)?.let { message ->
+                        plugin.slF4JLogger.info(message.body)
 
-                    writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
-                }
-            } ?: onDisconnect()
+                        writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
+                    }
+                } ?: onDisconnect()
 
-            handlerJob = launchMessageHandlers(acceptedSocket)
+                launchMessageHandlers(acceptedSocket)
+            }
         }
     }
 
@@ -153,7 +153,7 @@ class ClientSocketHolder(
             writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
 
             readChannel.readUTF8Line()?.let {
-                Message.parse(it)?.let { message ->
+                    Message.parse(it)?.let { message ->
                     plugin.slF4JLogger.info(message.body)
                 } ?: return@let null
             } ?: onDisconnect()
