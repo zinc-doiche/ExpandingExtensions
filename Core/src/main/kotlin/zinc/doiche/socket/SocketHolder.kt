@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
+import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import zinc.doiche.ExpandingExtensions.Companion.plugin
 import zinc.doiche.lib.launchAsync
 import zinc.doiche.socket.`object`.Message
@@ -48,7 +49,6 @@ class ServerSocketHolder(
         ) )
 
     override suspend fun connect() {
-
     }
 
     fun addListener(listener: MessageListener) {
