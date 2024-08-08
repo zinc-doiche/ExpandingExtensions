@@ -5,6 +5,7 @@ import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.*
 import zinc.doiche.ExpandingExtensions.Companion.plugin
+import zinc.doiche.lib.launchAsync
 import zinc.doiche.socket.context.ClientContextManager
 import zinc.doiche.socket.message.Message
 import zinc.doiche.socket.message.MessageListener
@@ -72,8 +73,7 @@ abstract class SocketHolder(
         }
     }
 
-
-    abstract suspend fun onDisconnect(scope: CoroutineScope, job: Job?)
+    abstract suspend fun onDisconnect()
 
     open suspend fun close() {
         readChannel.cancel()
@@ -107,29 +107,26 @@ class ServerSocketHolder(
 
                     writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
                 }
-            } ?: onDisconnect(this, handlerJob)
+            } ?: onDisconnect()
 
             handlerJob = launchMessageHandlers(acceptedSocket)
         }
     }
 
-    override suspend fun onDisconnect(scope: CoroutineScope, job: Job?) {
+    override suspend fun onDisconnect() {
         plugin.slF4JLogger.warn("[TCP Server] 클라이언트의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
 
         super.close()
         if(!acceptedSocket.isClosed) {
             acceptedSocket.close()
         }
+        launchAwait()
+    }
 
-        job?.let {
-            if(it.isCompleted) {
+    private fun launchAwait() {
+        plugin.launchAsync {
+            launch(Dispatchers.IO) {
                 await()
-            } else {
-                it.invokeOnCompletion {
-                    scope.launch(Dispatchers.IO) {
-                        await()
-                    }
-                }
             }
         }
     }
@@ -150,8 +147,6 @@ class ClientSocketHolder(
 
     suspend fun connect() {
         coroutineScope {
-            var handlerJob: Job? = null
-
             readChannel = socket.openReadChannel()
             writeChannel = socket.openWriteChannel(autoFlush = true)
 
@@ -161,26 +156,22 @@ class ClientSocketHolder(
                 Message.parse(it)?.let { message ->
                     plugin.slF4JLogger.info(message.body)
                 } ?: return@let null
-            } ?: onDisconnect(this, handlerJob)
+            } ?: onDisconnect()
 
-            handlerJob = launchMessageHandlers(socket)
+            launchMessageHandlers(socket)
         }
     }
 
-    override suspend fun onDisconnect(scope: CoroutineScope, job: Job?) {
+    override suspend fun onDisconnect() {
         plugin.slF4JLogger.warn("[TCP Client] 서버의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
-
         super.close()
+        launchConnect()
+    }
 
-        job?.let {
-            if(it.isCompleted) {
+    private fun launchConnect() {
+        plugin.launchAsync {
+            launch(Dispatchers.IO) {
                 connect()
-            } else {
-                it.invokeOnCompletion {
-                    scope.launch(Dispatchers.IO) {
-                        connect()
-                    }
-                }
             }
         }
     }

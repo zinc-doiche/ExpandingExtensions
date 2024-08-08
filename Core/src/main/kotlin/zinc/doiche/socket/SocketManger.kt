@@ -38,7 +38,7 @@ class SocketManger(
                         }.onSuccess { socket ->
                             val holder = ClientSocketHolder(socket, this@SocketManger)
 
-                            plugin.slF4JLogger.info("[TCP Client] $name(와)과 연결하였습니다.")
+                            plugin.slF4JLogger.info("[TCP Client] $name(와)과 연결 중...")
 
                             socketMap[name] = holder
                             holder.connect()
