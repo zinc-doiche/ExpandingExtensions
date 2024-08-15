@@ -24,10 +24,10 @@ subprojects {
     apply {
         plugin("kotlin")
         plugin("org.jetbrains.kotlin.jvm")
-        plugin("org.jetbrains.kotlin.kapt")
-        plugin("org.jetbrains.kotlin.plugin.jpa")
-        plugin("org.jetbrains.kotlin.plugin.allopen")
-        plugin("org.jetbrains.kotlin.plugin.noarg")
+//        plugin("org.jetbrains.kotlin.kapt")
+//        plugin("org.jetbrains.kotlin.plugin.jpa")
+//        plugin("org.jetbrains.kotlin.plugin.allopen")
+//        plugin("org.jetbrains.kotlin.plugin.noarg")
         plugin("io.papermc.paperweight.userdev")
         plugin("org.hidetake.ssh")
         plugin("com.github.johnrengelman.shadow")
@@ -46,11 +46,11 @@ subprojects {
     }
 
     with(extensions) {
-        configure(AllOpenExtension::class) {
-            annotation("jakarta.persistence.Entity")
-            annotation("jakarta.persistence.Embeddable")
-            annotation("jakarta.persistence.MappedSuperclass")
-        }
+//        configure(AllOpenExtension::class) {
+//            annotation("jakarta.persistence.Entity")
+//            annotation("jakarta.persistence.Embeddable")
+//            annotation("jakarta.persistence.MappedSuperclass")
+//        }
         configure(PaperweightUserExtension::class) {
             reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
         }
@@ -62,9 +62,9 @@ subprojects {
     dependencies {
         val implementation by configurations
         val compileOnly by configurations
-        val testImplementation by configurations
-        val testRuntimeOnly by configurations
-        val kapt by configurations
+//        val testImplementation by configurations
+//        val testRuntimeOnly by configurations
+//        val kapt by configurations
         val paperweight = extensions.getByType(PaperweightUserDependenciesExtension::class)
 
         paperweight.paperDevBundle("1.21-R0.1-SNAPSHOT")
@@ -81,31 +81,31 @@ subprojects {
 //        Database ==========================================================================
         compileOnly("com.google.code.gson:gson:2.10.1")
         implementation("redis.clients:jedis:5.1.2")
-        implementation("org.postgresql:postgresql:42.7.3")
-        implementation("org.hibernate:hibernate-core:6.5.0.Final") {
-            exclude(group = "cglib", module = "cglib")
-            exclude(group = "asm", module = "asm")
-        }
-        implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
-        implementation("org.ehcache:ehcache:3.10.0")
-        implementation("com.zaxxer:HikariCP:5.1.0")
-        implementation("com.querydsl:querydsl-core:5.0.0")
-        implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-        implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
-        implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
-        implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-        kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
-        kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
-
-        implementation("com.fasterxml.jackson.core:jackson-core:2.16.2")
-        implementation("com.fasterxml.jackson.core:jackson-databind:2.16.2")
+//        implementation("org.postgresql:postgresql:42.7.3")
+//        implementation("org.hibernate:hibernate-core:6.5.0.Final") {
+//            exclude(group = "cglib", module = "cglib")
+//            exclude(group = "asm", module = "asm")
+//        }
+//        implementation("org.hibernate:hibernate-jcache:6.5.0.Final")
+//        implementation("org.ehcache:ehcache:3.10.0")
+//        implementation("com.zaxxer:HikariCP:5.1.0")
+//        implementation("com.querydsl:querydsl-core:5.0.0")
+//        implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
+//        implementation("com.querydsl:querydsl-apt:5.0.0:jakarta")
+//        implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+//        implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
+//        kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
+//        kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+//
+//        implementation("com.fasterxml.jackson.core:jackson-core:2.16.2")
+//        implementation("com.fasterxml.jackson.core:jackson-databind:2.16.2")
 
 //        Test ==========================================================================
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-
-        testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
-        testImplementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-test:2.15.0")
+//        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+//        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+//
+//        testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+//        testImplementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-test:2.15.0")
     }
 
     tasks {

@@ -1,34 +1,20 @@
 package zinc.doiche.service.gui.entity
 
-import jakarta.persistence.*
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.inventory.BeaconInventory
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.InventoryView
 
-@Entity
-@Table(name = "TBL_GUI")
 class GUI(
-    @Column(nullable = false, unique = true) val name: String,
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    val name: String,
     val type: GUIType
 ) {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
-
-    @OneToMany(mappedBy = "gui", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val slots: MutableList<GUISlot> = mutableListOf()
-
-    @OneToMany(mappedBy = "gui", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val titles: MutableList<GUITitle> = mutableListOf()
 
-    @get:Transient
     val thumbTitle: Component
         get() = titles.firstOrNull()?.image?.asTitle() ?: Component.text(name)
 

@@ -1,33 +1,19 @@
 package zinc.doiche.service.item.entity
 
-import jakarta.persistence.*
 import net.minecraft.core.component.DataComponents
 import net.minecraft.nbt.TagParser
 import net.minecraft.world.item.component.CustomData
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import zinc.doiche.lib.embeddable.DisplayedInfo
 import zinc.doiche.util.editTag
 import zinc.doiche.util.serialize
 
-@Entity
-@Table(name = "TBL_ITEM_DATA")
 class ItemData(
-    @Embedded
     val displayedInfo: DisplayedInfo,
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     val material: Material,
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(nullable = false, columnDefinition = "json")
     val tags: MutableMap<String, Any> = mutableMapOf()
 ) {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long? = null
 
     fun displayName() = displayedInfo.displayName()// = miniMessage().deserialize(displayName)

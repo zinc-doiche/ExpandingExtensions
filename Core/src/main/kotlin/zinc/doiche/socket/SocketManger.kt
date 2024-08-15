@@ -1,4 +1,4 @@
-package zinc.doiche.socket;
+package zinc.doiche.socket
 
 import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
