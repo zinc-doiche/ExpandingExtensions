@@ -37,12 +37,8 @@ interface ProcessorFactory<T> {
                 reflections.getTypesAnnotatedWith(ListenerRegistry::class.java).forEach { clazz ->
                     if(Listener::class.java.isAssignableFrom(clazz)) {
                         val listener = clazz.getDeclaredConstructor().newInstance() as Listener
-                        val listenerRegistry = clazz.getAnnotation(ListenerRegistry::class.java)
-                        if(listenerRegistry.async) {
-                            plugin.registerSuspending(listener)
-                        } else {
-                            plugin.register(listener)
-                        }
+
+                        plugin.registerSuspending(listener)
                     }
                 }
             }

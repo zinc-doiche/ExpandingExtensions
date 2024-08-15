@@ -20,7 +20,7 @@ class SocketManger(
         config.servers
     )
 
-    suspend fun connect() {
+    fun connect() {
         plugin.launchAsync {
             launch(Dispatchers.IO) {
                 val selectorManager = SelectorManager(Dispatchers.IO)
@@ -38,12 +38,12 @@ class SocketManger(
                         }.onSuccess { socket ->
                             val holder = ClientSocketHolder(socket, this@SocketManger)
 
-                            plugin.slF4JLogger.info("[TCP Client] Connected with: $name")
+                            plugin.slF4JLogger.info("[TCP Client] $name(와)과 연결 중...")
 
                             socketMap[name] = holder
                             holder.connect()
                         }.onFailure {
-                            plugin.slF4JLogger.warn("[TCP Client] Connection failed with: $name, Trying to binding...")
+                            plugin.slF4JLogger.warn("[TCP Client] $name(와)과 연결하는 데 실패하였습니다. 호스트(Server)로서 바인딩합니다.")
                             aSocket(selectorManager)
                                 .tcpNoDelay()
                                 .tcp()
@@ -51,7 +51,7 @@ class SocketManger(
                                 .let { serverSocket ->
                                     val holder = ServerSocketHolder(serverSocket, this@SocketManger)
 
-                                    plugin.slF4JLogger.info("[TCP Server] Listening at: ${serverSocket.localAddress}")
+                                    plugin.slF4JLogger.info("[TCP Server] ${serverSocket.localAddress}에서 요청을 기다리는 중...")
 
                                     socketMap[name] = holder
                                     holder.await()
@@ -61,31 +61,6 @@ class SocketManger(
                 }
             }
         }
-//
-//        lateinit var receiveChannel: ByteReadChannel
-//        lateinit var sendChannel: ByteWriteChannel
-//
-//        plugin.server.pluginManager.registerEvents(object : Listener {
-//            @EventHandler
-//            fun onChat(event: AsyncChatEvent) {
-//                val player = event.player
-//                val message = event.message() as TextComponent
-//
-//                plugin.launchAsync {
-//                    launch(Dispatchers.IO) {
-//                        Bukkit.broadcast(text("[Client] Wait Writing..."))
-//                        sendChannel.writeStringUtf8("${message.content()}\n")
-//                        Bukkit.broadcast(text("[Client] writing end!"))
-//
-//                        Bukkit.broadcast(text("[Client] Wait Reading..."))
-//                        val response = receiveChannel.readUTF8Line() ?: "no response"
-//                        Bukkit.broadcast(text("[Client] read end!"))
-//
-//                        player.sendMessage(text(response))
-//                    }
-//                }
-//            }
-//        }, plugin)
     }
 
     override fun close() {

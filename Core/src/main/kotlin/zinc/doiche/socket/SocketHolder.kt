@@ -3,12 +3,9 @@ package zinc.doiche.socket
 import com.google.common.collect.Multimaps
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.errors.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import zinc.doiche.ExpandingExtensions.Companion.plugin
+import zinc.doiche.lib.launchAsync
 import zinc.doiche.socket.context.ClientContextManager
 import zinc.doiche.socket.message.Message
 import zinc.doiche.socket.message.MessageListener
@@ -46,30 +43,28 @@ abstract class SocketHolder(
         messageQueue.add(message)
     }
 
-    protected suspend fun launchMessageHandlers(socket: Socket) {
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                while (!socket.isClosed) {
-                    messageQueue.peek()?.let { message ->
-                        clientContextManager.bindRequest(message)
-                        writeChannel.writeStringUtf8(message.protocolize())
-                    }
+    protected suspend fun launchMessageHandlers(socket: Socket) = coroutineScope {
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                messageQueue.peek()?.let { message ->
+                    clientContextManager.bindRequest(message)
+                    writeChannel.writeStringUtf8(message.protocolize())
                 }
             }
-            launch(Dispatchers.IO) {
-                while (!socket.isClosed) {
-                    val line = readChannel.readUTF8Line() ?: continue
+        }
+        launch(Dispatchers.IO) {
+            while (!socket.isClosed) {
+                val line = readChannel.readUTF8Line() ?: continue
 
-                    Message.parse(line)?.let { message ->
-                        when (message.messageType) {
-                            MessageType.RESPONSE -> {
-                                clientContextManager.handleResponse(message)
-                            }
+                Message.parse(line)?.let { message ->
+                    when (message.messageType) {
+                        MessageType.RESPONSE -> {
+                            clientContextManager.handleResponse(message)
+                        }
 
-                            MessageType.REQUEST -> {
-                                messageServerListeners[message.messageProtocol].forEach { listener ->
-                                    listener.onMessage(message)
-                                }
+                        MessageType.REQUEST -> {
+                            messageServerListeners[message.messageProtocol].forEach { listener ->
+                                listener.onMessage(message)
                             }
                         }
                     }
@@ -77,6 +72,8 @@ abstract class SocketHolder(
             }
         }
     }
+
+    abstract suspend fun onDisconnect()
 
     open suspend fun close() {
         readChannel.cancel()
@@ -93,24 +90,47 @@ class ServerSocketHolder(
 
     suspend fun await() {
         coroutineScope {
-            plugin.slF4JLogger.info("[TCP Server] Wait accepting...")
+            plugin.slF4JLogger.info("[TCP Server] 클라이언트의 연결 대기 중...")
 
             acceptedSocket = socket.accept()
 
-            plugin.slF4JLogger.info("[TCP Server] Accepted!")
+            plugin.slF4JLogger.info("[TCP Server] 연결되었습니다.")
 
             readChannel = acceptedSocket.openReadChannel()
             writeChannel = acceptedSocket.openWriteChannel(autoFlush = true)
 
-            readChannel.readUTF8Line()?.let {
-                Message.parse(it)?.let { message ->
-                    plugin.slF4JLogger.info(message.body)
+            plugin.slF4JLogger.info("[TCP Server] open")
 
-                    writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
-                }
-            } ?: throw IOException("클라이언트의 요청이 없습니다.")
+            launch(Dispatchers.IO) {
+                plugin.slF4JLogger.info("[TCP Server] waiting reading.")
+                readChannel.readUTF8Line()?.let {
+                    Message.parse(it)?.let { message ->
+                        plugin.slF4JLogger.info(message.body)
 
-            launchMessageHandlers(acceptedSocket)
+                        writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
+                    }
+                } ?: onDisconnect()
+
+                launchMessageHandlers(acceptedSocket)
+            }
+        }
+    }
+
+    override suspend fun onDisconnect() {
+        plugin.slF4JLogger.warn("[TCP Server] 클라이언트의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
+
+        super.close()
+        if(!acceptedSocket.isClosed) {
+            acceptedSocket.close()
+        }
+        launchAwait()
+    }
+
+    private fun launchAwait() {
+        plugin.launchAsync {
+            launch(Dispatchers.IO) {
+                await()
+            }
         }
     }
 
@@ -130,19 +150,32 @@ class ClientSocketHolder(
 
     suspend fun connect() {
         coroutineScope {
-//            while ()
             readChannel = socket.openReadChannel()
             writeChannel = socket.openWriteChannel(autoFlush = true)
 
             writeChannel.writeStringUtf8(MessageProtocol.HANDSHAKE.message("greetings!"))
-
+            plugin.slF4JLogger.info("[TCP Server] Wait reading")
             readChannel.readUTF8Line()?.let {
-                Message.parse(it)?.let { message ->
+                    Message.parse(it)?.let { message ->
                     plugin.slF4JLogger.info(message.body)
                 } ?: return@let null
-            } ?: throw IOException("서버의 응답이 없습니다.")
+            } ?: onDisconnect()
 
             launchMessageHandlers(socket)
+        }
+    }
+
+    override suspend fun onDisconnect() {
+        plugin.slF4JLogger.warn("[TCP Client] 서버의 응답이 없습니다. 다시 연결될 때까지 대기합니다.")
+        super.close()
+        launchConnect()
+    }
+
+    private fun launchConnect() {
+        plugin.launchAsync {
+            launch(Dispatchers.IO) {
+                connect()
+            }
         }
     }
 
